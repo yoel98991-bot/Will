@@ -1,0 +1,11 @@
+{
+  "name": "ferrowill",
+  "version": "1.0.0",
+  "dependencies": {
+    "@capacitor/android": "latest",
+    "@capacitor/core": "latest"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "latest"
+  }
+}
