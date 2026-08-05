@@ -1,0 +1,6 @@
+{
+  "appId": "com.ferrowill.app",
+  "appName": "FerroWill",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
