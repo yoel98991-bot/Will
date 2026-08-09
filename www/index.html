@@ -3,498 +3,286 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Inventario App - Supabase</title>
+    <title>Inventario App Pro - Multi-Tienda Segura</title>
     <!-- Librería Chart.js para la gráfica -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Librería oficial de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Fuentes Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
-        /* Reset y Tipografía Móvil */
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+            font-family: 'Inter', -apple-system, sans-serif;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #F3F4F6;
-            color: #111827;
+            background-color: #F8FAFC;
+            color: #0F172A;
             margin: 0;
             padding: 0;
-            padding-bottom: 80px;
+            padding-bottom: 90px;
             text-align: left;
         }
 
-        h1, h2, h3, p, span, div, label, th, td {
-            text-align: left;
-        }
+        h1, h2, h3, h4, p, span, div, label, th, td { text-align: left; }
 
-        /* Cabecera de la App */
+        /* Cabecera */
         .app-header {
             background-color: #FFFFFF;
-            padding: 20px;
+            padding: 16px 24px;
             position: sticky;
             top: 0;
             z-index: 10;
-            border-bottom: 1px solid #E5E7EB;
-            margin-bottom: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .app-header h1 {
             font-size: 20px;
-            font-weight: 700;
-            color: #1F2937;
+            font-weight: 800;
+            color: #0F172A;
             margin: 0;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Contenedores de Pantalla */
-        .pantalla {
+        .header-indicador-tienda {
+            font-size: 11px;
+            font-weight: 700;
+            color: #2563EB;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+        
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+
+        .btn-icon-action {
+            background: #F1F5F9;
+            border: none;
+            color: #475569;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .btn-icon-action:active { background: #E2E8F0; color: #0F172A; }
+
+        .btn-toggle-admin {
+            background: #0F172A;
+            color: #FFFFFF;
+            border: none;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+        }
+
+        /* Buscador */
+        #search-bar-container {
             display: none;
-            padding: 0 15px;
+            background-color: #FFFFFF;
+            padding: 15px 24px;
+            border-bottom: 1px solid #E2E8F0;
+            margin-bottom: 15px;
         }
 
-        .pantalla.activa {
-            display: block;
+        .search-input-wrapper { position: relative; width: 100%; }
+        .search-input-wrapper svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94A3B8; }
+        .search-input-wrapper input {
+            width: 100%;
+            padding: 12px 12px 12px 42px;
+            font-size: 15px;
+            font-weight: 600;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            background-color: #F8FAFC;
+            outline: none;
         }
+        .search-input-wrapper input:focus { border-color: #2563EB; background-color: #FFFFFF; }
 
-        /* Formularios Estilo App */
+        /* Pantallas */
+        .pantalla { display: none; padding: 0 20px; margin-top: 20px; }
+        .pantalla.activa { display: block; }
+
+        /* Formularios y Tarjetas */
         .form-group {
             margin-bottom: 20px;
             background-color: #FFFFFF;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #E5E7EB;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            border: 1px solid #E2E8F0;
         }
 
         label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 8px;
+            display: block; font-size: 12px; font-weight: 800;
+            color: #64748B; margin-bottom: 8px; text-transform: uppercase;
+            letter-spacing: 0.8px;
         }
 
-        input[type="text"],
-        input[type="number"],
-        input[type="file"] {
+        input[type="text"], input[type="number"], input[type="password"], select {
             width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid #D1D5DB;
-            border-radius: 8px;
-            background-color: #F9FAFB;
-            color: #111827;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            border: 2px solid #E2E8F0;
+            border-radius: 14px;
+            background-color: #F8FAFC;
+            color: #0F172A;
             outline: none;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
         }
+        input:focus, select:focus { border-color: #0F172A; background-color: #FFFFFF; }
 
-        input:focus {
-            border-color: #111827;
-            background-color: #FFFFFF;
-            box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.1);
-        }
-
-        /* Botones Generales */
+        /* Botones */
         .btn {
             display: block;
             width: 100%;
-            background-color: #111827;
+            background-color: #0F172A;
             color: #FFFFFF;
             border: none;
-            padding: 15px;
+            padding: 16px;
             font-size: 16px;
-            font-weight: 600;
-            border-radius: 12px;
+            font-weight: 700;
+            border-radius: 14px;
             cursor: pointer;
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.15);
             transition: transform 0.1s ease;
         }
-        
-        .btn:active {
-            transform: scale(0.98);
-        }
+        .btn:active { transform: scale(0.98); }
 
         .btn-secundario {
-            background-color: #E5E7EB;
-            color: #111827;
+            background-color: #F1F5F9;
+            color: #0F172A;
+            box-shadow: none;
+            border: 1px solid #CBD5E1;
+        }
+        .btn-peligro { background-color: #EF4444; color: #FFFFFF; }
+
+        .btn-revertir {
+            background-color: #FEF2F2;
+            color: #DC2626;
+            border: 1px solid #FCA5A5;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
         }
 
-        .btn-peligro {
-            background-color: #EF4444;
-            color: #FFFFFF;
-        }
-
-        /* -------------------------------------
-           DISEÑO DE TARJETA DE PRODUCTO
-           ------------------------------------- */
-        .grid-productos {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
-
+        /* Tarjetas de Producto */
+        .grid-productos { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        
         .card {
             background-color: #FFFFFF;
             border-radius: 20px;
             overflow: hidden;
-            border: none;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.03);
-            transition: transform 0.2s ease;
-            cursor: pointer;
-        }
-        
-        .card:active {
-            transform: scale(0.99);
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
         }
 
         .card img {
             width: 100%;
             height: 240px;
             object-fit: cover;
-            background-color: #F9FAFB;
-            display: block;
-            border-bottom: 1px solid #F3F4F6;
-        }
-
-        .card-body {
-            padding: 20px;
-        }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: 800;
-            margin-bottom: 15px;
-            margin-top: 0;
-            color: #111827;
-            letter-spacing: -0.3px;
-        }
-
-        .tallas-container {
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .talla-card {
-            background-color: #FFFFFF;
-            border: 1px solid #E5E7EB;
-            border-radius: 14px;
-            padding: 14px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.015);
-        }
-
-        .talla-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            border-bottom: 1px dashed #E5E7EB;
-            padding-bottom: 10px;
-        }
-
-        .talla-numero {
-            font-weight: 800;
-            font-size: 16px;
-            color: #1F2937;
-        }
-
-        .talla-stock {
-            font-size: 11px;
-            font-weight: 700;
-            padding: 5px 10px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stock-ok {
-            background-color: #D1FAE5;
-            color: #065F46;
-        }
-
-        .stock-out {
-            background-color: #FEE2E2;
-            color: #991B1B;
-        }
-
-        .talla-body {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-
-        .talla-finanzas {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            font-size: 13px;
-        }
-
-        .precio-item {
-            color: #6B7280;
-        }
-        
-        .precio-item .lbl {
-            display: inline-block;
-            width: 65px;
-        }
-
-        .precio-item.ganancia {
-            color: #059669;
-            font-weight: 600;
-            margin-top: 2px;
-        }
-
-        .btn-vender {
-            background-color: #111827;
-            color: #FFFFFF;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 14px;
+            background-color: #F1F5F9;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 6px rgba(17, 24, 39, 0.15);
         }
 
-        .btn-vender svg {
-            width: 16px;
-            height: 16px;
-        }
+        .card-body { padding: 20px; }
+        .card-title { font-size: 20px; font-weight: 800; margin: 0 0 6px 0; color: #0F172A; }
 
-        .btn-vender:active {
-            transform: scale(0.92);
-            box-shadow: 0 2px 4px rgba(17, 24, 39, 0.1);
-        }
-
-        .btn-vender:disabled {
-            background-color: #E5E7EB;
-            color: #9CA3AF;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* -------------------------------------
-           MÓDULO DE FINANZAS PREMIUM
-           ------------------------------------- */
+        /* Módulos de Finanzas */
         .seccion-finanzas {
             background-color: #FFFFFF;
-            padding: 22px;
+            padding: 24px;
             border-radius: 20px;
-            border: none;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.03);
             margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            border: 1px solid #E2E8F0;
         }
 
         .seccion-header-finanzas {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 18px;
-            border-bottom: 1px dashed #E5E7EB;
+            margin-bottom: 20px;
             padding-bottom: 12px;
+            border-bottom: 2px dashed #E2E8F0;
         }
 
         .seccion-header-finanzas h3 {
-            font-size: 13px;
-            color: #6B7280;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin: 0;
-            font-weight: 700;
-        }
-
-        .badge-fecha {
-            background-color: #111827;
-            color: #FFFFFF;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 20px;
-            letter-spacing: 0.3px;
-        }
-
-        .grid-resumen {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .caja-resumen {
-            background-color: #F9FAFB;
-            padding: 16px;
-            border-radius: 16px;
-            border: 1px solid #E5E7EB;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .caja-resumen.destacada {
-            background-color: #111827;
-            color: #FFFFFF;
-            border: none;
-            box-shadow: 0 4px 12px rgba(17, 24, 39, 0.15);
-        }
-
-        .caja-resumen.destacada p {
-            color: #9CA3AF;
-        }
-
-        .caja-resumen.destacada .monto {
-            color: #FFFFFF;
-        }
-
-        .caja-resumen p {
-            font-size: 11px;
-            color: #6B7280;
-            margin-bottom: 8px;
-            margin-top: 0;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .caja-resumen .monto {
-            font-size: 22px;
-            font-weight: 800;
-            color: #111827;
-            letter-spacing: -0.5px;
-        }
-
-        .monto.verde {
-            color: #059669;
-        }
-
-        .caja-unidades-hoy {
-            background-color: #F9FAFB;
-            border: 1px solid #E5E7EB;
-            padding: 12px 16px;
-            border-radius: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 13px;
-            color: #4B5563;
-            font-weight: 600;
-        }
-
-        .caja-unidades-hoy strong {
             font-size: 16px;
+            color: #0F172A;
+            margin: 0;
             font-weight: 800;
-            color: #111827;
-            background: #FFFFFF;
-            padding: 3px 10px;
-            border-radius: 8px;
-            border: 1px solid #E5E7EB;
         }
 
-        /* Lista de Productos Vendidos */
-        .item-venta {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid #F3F4F6;
-        }
-
-        .item-venta:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .item-venta img {
-            width: 48px;
-            height: 48px;
-            border-radius: 10px;
-            object-fit: cover;
-            background-color: #F9FAFB;
-            border: 1px solid #E5E7EB;
-        }
-
-        .item-venta-info {
-            flex-grow: 1;
-        }
-
-        .item-venta-nombre {
-            font-size: 14px;
-            font-weight: 700;
-            color: #111827;
-            margin-bottom: 4px;
-        }
-
-        .item-venta-meta {
-            font-size: 12px;
-            color: #6B7280;
-        }
-
-        .item-venta-finanzas {
-            text-align: right;
-        }
-
-        .item-venta-total {
-            font-size: 14px;
-            font-weight: 800;
-            color: #111827;
-        }
-
-        .item-venta-ganancia {
-            font-size: 12px;
-            font-weight: 600;
-            color: #059669;
-        }
-
-        /* Tabla de Historial */
-        .tabla-historial {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 8px;
-            font-size: 14px;
-        }
-
-        .tabla-historial th, .tabla-historial td {
-            padding: 12px 8px;
-            border-bottom: 1px solid #F3F4F6;
-            vertical-align: middle;
-        }
-
-        .tabla-historial th {
-            color: #9CA3AF;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 11px;
-            letter-spacing: 0.5px;
-        }
-
-        .tabla-historial td {
-            color: #111827;
-            font-weight: 500;
-        }
-
-        .btn-ver-detalle {
-            background-color: #F3F4F6;
-            color: #111827;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: background 0.2s;
+        .caja-tienda {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
         }
         
-        .btn-ver-detalle:hover {
-            background-color: #E5E7EB;
+        .caja-tienda-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .caja-tienda-header h4 { margin: 0; font-size: 18px; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 8px; }
+
+        .moneda-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #E2E8F0;
+            font-size: 15px;
+        }
+        .moneda-row span { color: #64748B; font-weight: 600; }
+        .moneda-row strong { color: #0F172A; font-weight: 800; }
+        .moneda-ars strong { color: #2563EB; }
+
+        .resultado-cierre {
+            background: #D1FAE5;
+            border-radius: 14px;
+            padding: 16px;
+            margin-top: 15px;
+            display: none;
+            border: 1px solid #A7F3D0;
+        }
+        .res-fila { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .res-fila:last-child { margin-bottom: 0; padding-top: 8px; border-top: 1px dashed #34D399; font-size: 16px; font-weight: 800; color: #065F46; }
+
+        .api-panel {
+            background: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        /* Barra de Navegación */
+        /* Navegación */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -504,193 +292,125 @@
             display: flex;
             justify-content: space-around;
             padding: 12px 0;
-            border-top: 1px solid #E5E7EB;
+            border-top: 1px solid #E2E8F0;
             z-index: 20;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.02);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
         }
 
         .nav-item {
             background: none;
             border: none;
-            color: #9CA3AF;
+            color: #94A3B8;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 6px;
-            padding: 8px 12px;
-            width: 33%;
+            padding: 8px;
             cursor: pointer;
-            transition: color 0.2s ease;
         }
-
-        .nav-item svg {
-            width: 24px;
-            height: 24px;
-            stroke: currentColor;
-            stroke-width: 2;
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .nav-item.activa {
-            color: #111827;
-        }
+        .nav-item.activa { color: #0F172A; }
+        .nav-item svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none; }
 
         /* Modales */
         .modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(17, 24, 39, 0.7);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(15, 23, 42, 0.75);
             z-index: 1000;
             align-items: flex-end;
             backdrop-filter: blur(4px);
         }
-
         .modal-content {
             background-color: #FFFFFF;
-            padding: 25px 20px;
+            padding: 25px;
             width: 100%;
             border-radius: 24px 24px 0 0;
             max-height: 85vh;
             overflow-y: auto;
         }
+        .modal-cerrar { background: none; border: none; font-size: 28px; color: #64748B; cursor: pointer; }
 
-        .modal-cerrar {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #6B7280;
-            cursor: pointer;
-            line-height: 1;
-        }
+        #loader-overlay { align-items: center; justify-content: center; }
+        .loader-box { background: #FFFFFF; padding: 30px; border-radius: 20px; text-align: center; width: 80%; max-width: 300px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .spinner { border: 4px solid #F1F5F9; border-top: 4px solid #0F172A; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 15px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Campos Tallas en Agregar */
-        .item-talla-fila {
-            background-color: #F9FAFB;
-            border: 1px solid #E5E7EB;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-        }
-
-        .item-talla-fila label {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: #111827;
-        }
-
-        .inputs-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 12px;
-        }
-
-        .inputs-grid input {
-            padding: 10px;
-            font-size: 15px;
-        }
-
-        /* Ajustador de cantidad con botones +/- en modal de edición */
-        .control-cantidad-grupo {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .btn-stepper {
-            background-color: #E5E7EB;
-            color: #111827;
-            border: none;
-            width: 38px;
-            height: 42px;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        
-        .btn-stepper:active {
-            background-color: #D1D5DB;
-        }
-
-        /* -------------------------------------
-           INDICADOR DE CARGA (SPINNER)
-           ------------------------------------- */
-        #loader-overlay {
-            align-items: center; 
-            justify-content: center;
-        }
-        
-        .loader-box {
-            background: #FFFFFF;
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            width: 80%;
-            max-width: 300px;
-        }
-
-        .spinner {
-            border: 4px solid #F3F4F6;
-            border-top: 4px solid #111827;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px auto;
-        }
-
-        @keyframes spin { 
-            0% { transform: rotate(0deg); } 
-            100% { transform: rotate(360deg); } 
-        }
-
-        .loader-text {
-            font-size: 15px;
-            font-weight: 700;
-            color: #111827;
-            margin: 0;
-        }
+        /* Permisos Rol Vendedora */
+        body.role-vendedor #nav-agregar,
+        body.role-vendedor #btn-exportar-admin,
+        body.role-vendedor .btn-editar-admin,
+        body.role-vendedor .modulo-admin-cierre,
+        body.role-vendedor #seccion-grafica-admin { display: none !important; }
+        body.role-vendedor .bottom-nav { justify-content: space-around; }
+        body.role-vendedor .nav-item { width: 50%; }
     </style>
 </head>
-<body>
+<body class="role-vendedor">
 
     <!-- OVERLAY DE CARGA -->
-    <div id="loader-overlay" class="modal-overlay">
+    <div id="loader-overlay" class="modal-overlay" style="z-index: 3000;">
         <div class="loader-box">
             <div class="spinner"></div>
-            <p id="loader-text" class="loader-text">Procesando...</p>
+            <p id="loader-text" style="font-weight:800; font-size:16px; margin:0; color:#0F172A;">Procesando...</p>
         </div>
     </div>
 
-    <!-- Cabecera -->
+    <!-- MODAL DE PIN / VINCULACIÓN DE TIENDA -->
+    <div id="modal-codigo-tienda" class="modal-overlay" style="z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+        <div class="modal-content" style="border-radius: 24px; padding: 30px; text-align: center; max-width: 350px;">
+            <div style="background:#DBEAFE; width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin: 0 auto 15px auto;">
+                <svg viewBox="0 0 24 24" width="30" height="30" stroke="#1D4ED8" stroke-width="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </div>
+            <h2 style="font-size:22px; font-weight:800; color:#0F172A; margin-top:0; margin-bottom:8px;">Vincular Dispositivo</h2>
+            <p style="color:#64748B; font-size:14px; margin-bottom:20px;">Ingresa el PIN de Tienda (1111 / 2222) o Clave Admin.</p>
+            <input type="password" id="input-codigo-tienda" placeholder="PIN..." style="text-align:center; letter-spacing:4px; font-size:20px; font-weight:800; margin-bottom:20px;">
+            <button class="btn" style="background:#2563EB;" onclick="verificarCodigoTienda()">Verificar y Entrar</button>
+        </div>
+    </div>
+
+    <!-- CABECERA -->
     <header class="app-header">
-        <h1 id="titulo-header">Mi Inventario</h1>
+        <h1>
+            Mi Inventario
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span class="header-indicador-tienda" id="indicador-tienda-header">Cargando...</span>
+                <span id="badge-conexion" style="font-size:10px; padding:2px 6px; border-radius:6px; background:#10B981; color:white; font-weight:bold;">Online</span>
+            </div>
+        </h1>
+        <div class="header-actions">
+            <!-- Botón de Sincronización Manual -->
+            <button id="btn-sync" class="btn-icon-action" style="display:none; color:#F59E0B; background:#FEF3C7;" onclick="sincronizarVentasOffline()" title="Sincronizar Ventas Offline">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
+            </button>
+            
+            <button id="btn-cambiar-tienda" class="btn-icon-action" onclick="resetearTienda()" title="Cerrar Sesión de Tienda / Cambiar">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            </button>
+            <button id="btn-exportar-admin" class="btn-icon-action" onclick="exportarInventarioExcel()" title="Exportar Inventario">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 18 15 15"></polyline></svg>
+            </button>
+            <button class="btn-icon-action" onclick="toggleSearch()" title="Buscar">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+            <button id="btn-admin-toggle" class="btn-toggle-admin" onclick="toggleAdmin()">Entrar Admin</button>
+        </div>
     </header>
+
+    <!-- BUSCADOR -->
+    <div id="search-bar-container">
+        <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="input-busqueda" placeholder="Buscar modelo..." onkeyup="filtrarInventario(this.value)">
+        </div>
+    </div>
 
     <!-- PANTALLA 1: INVENTARIO -->
     <main id="pantalla-inventario" class="pantalla activa">
-        <div id="estado-vacio" style="padding: 60px 20px; color: #6B7280; text-align: center;">
-            <svg viewBox="0 0 24 24" width="48" height="48" stroke="#D1D5DB" stroke-width="1.5" fill="none" style="margin: 0 auto 15px auto; display: block;">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                <line x1="12" y1="22.08" x2="12" y2="12"></line>
-            </svg>
-            <p style="text-align: center; font-size: 16px;">No hay zapatos registrados.</p>
-            <p style="text-align: center; font-size: 14px; margin-top: 5px;">Ve a "Agregar" para empezar a nutrir tu catálogo.</p>
+        <div id="estado-vacio" style="padding: 60px 20px; color: #94A3B8; text-align: center; display:none;">
+            <p style="font-size: 18px; font-weight:700;">Inventario Vacío o Cargando...</p>
         </div>
         <div id="contenedor-productos" class="grid-productos"></div>
     </main>
@@ -705,840 +425,991 @@
 
             <div class="form-group">
                 <label>Foto del Producto</label>
-                <input type="file" id="foto-zapato" accept="image/*" required style="padding: 8px;">
+                <div style="display: flex; gap: 12px;">
+                    <label class="btn btn-secundario" style="flex:1; text-align:center; cursor:pointer; font-size:14px; padding:12px; display:flex; align-items:center; justify-content:center; gap:6px;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                        Cámara <input type="file" accept="image/*" capture="environment" style="display: none;" onchange="seleccionarFotoUI(this)">
+                    </label>
+                    <label class="btn btn-secundario" style="flex:1; text-align:center; cursor:pointer; font-size:14px; padding:12px; display:flex; align-items:center; justify-content:center; gap:6px;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        Galería <input type="file" accept="image/*" style="display: none;" onchange="seleccionarFotoUI(this)">
+                    </label>
+                </div>
+                <div id="preview-foto-container" style="display: none; margin-top: 15px; text-align: center;">
+                    <img id="preview-foto" src="" style="width: 120px; height: 120px; object-fit: cover; border-radius: 16px; border:2px solid #E2E8F0; margin: 0 auto;">
+                </div>
             </div>
 
             <div class="form-group">
-                <label>Configuración por Talla</label>
-                <button type="button" class="btn btn-secundario" onclick="abrirModalTallas()">Configurar Cantidades y Precios</button>
-                <p id="texto-tallas-seleccionadas" style="margin-top: 15px; font-size: 14px; color: #6B7280;">Ninguna talla configurada aún.</p>
+                <label>Configuración de Stock</label>
+                <button type="button" class="btn btn-secundario" onclick="abrirModalTallas()">Configurar Tallas y Precios</button>
+                <p id="texto-tallas-seleccionadas" style="margin-top: 12px; font-size: 13px; color: #64748B; font-weight:600;">Ninguna talla configurada.</p>
             </div>
-
-            <button type="submit" class="btn" style="margin-bottom: 30px;">Guardar Producto en Inventario</button>
+            <button type="submit" class="btn">Guardar Producto</button>
         </form>
     </main>
 
-    <!-- PANTALLA 3: FINANZAS Y GRÁFICA -->
+    <!-- PANTALLA 3: FINANZAS Y REPORTES -->
     <main id="pantalla-ganancias" class="pantalla">
+        
+        <!-- Panel Resumen de Tasa Activa -->
+        <div class="api-panel modulo-admin-cierre">
+            <div>
+                <span style="font-size:12px; font-weight:800; color:#64748B; text-transform:uppercase;">Tasa de Cambio Activa</span>
+                <div id="badge-tasa-api" style="color:#1D4ED8; font-size:16px; font-weight:800; margin-top:4px;">No configurada</div>
+            </div>
+            <button class="btn-icon-action" style="background:#DBEAFE; color:#1D4ED8; padding: 12px;" onclick="abrirModalTasa()" title="Configurar Tasa">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+            </button>
+        </div>
+
+        <div class="modulo-admin-cierre">
+            <h3 style="font-size:14px; font-weight:800; color:#0F172A; margin-bottom:15px;">Panel de Cierre por Sucursal (Hoy)</h3>
+            
+            <!-- CAJA TIENDA 1 -->
+            <div class="caja-tienda">
+                <div class="caja-tienda-header">
+                    <h4>
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        Tienda 1
+                    </h4>
+                </div>
+                <div class="moneda-row" style="background: #E0E7FF; padding: 12px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #C7D2FE;">
+                    <span style="color:#3730A3;">Pares Vendidos Hoy:</span>
+                    <strong style="color:#312E81; font-size: 18px;" id="pares-t1">0 pares</strong>
+                </div>
+                <div class="moneda-row"><span>Caja Fuerte (BOB):</span><strong id="bob-t1">Bs. 0.00</strong></div>
+                <div class="moneda-row moneda-ars"><span>Caja Fuerte (ARS):</span><strong id="ars-t1">$ 0.00</strong></div>
+                
+                <div class="resultado-cierre" id="res-t1">
+                    <div class="res-fila"><span>Conversión ARS a BOB:</span> <strong id="conv-ars-t1">Bs. 0.00</strong></div>
+                    <div class="res-fila"><span>Costo Total Mercancía:</span> <strong id="costo-t1" style="color:#DC2626;">- Bs. 0.00</strong></div>
+                    <div class="res-fila" style="margin-top:10px; padding-top:10px; border-top:1px solid #A7F3D0;"><span>TOTAL CIERRE (BOB):</span> <strong id="total-cierre-t1">Bs. 0.00</strong></div>
+                    <div class="res-fila"><span>GANANCIA NETA:</span> <strong id="ganancia-t1">Bs. 0.00</strong></div>
+                </div>
+                <button class="btn btn-secundario" style="margin-top:15px;" onclick="ejecutarCierreTienda('1')">Crear Cierre (Tienda 1)</button>
+            </div>
+
+            <!-- CAJA TIENDA 2 -->
+            <div class="caja-tienda">
+                <div class="caja-tienda-header">
+                    <h4>
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        Tienda 2
+                    </h4>
+                </div>
+                <div class="moneda-row" style="background: #E0E7FF; padding: 12px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #C7D2FE;">
+                    <span style="color:#3730A3;">Pares Vendidos Hoy:</span>
+                    <strong style="color:#312E81; font-size: 18px;" id="pares-t2">0 pares</strong>
+                </div>
+                <div class="moneda-row"><span>Caja Fuerte (BOB):</span><strong id="bob-t2">Bs. 0.00</strong></div>
+                <div class="moneda-row moneda-ars"><span>Caja Fuerte (ARS):</span><strong id="ars-t2">$ 0.00</strong></div>
+                
+                <div class="resultado-cierre" id="res-t2">
+                    <div class="res-fila"><span>Conversión ARS a BOB:</span> <strong id="conv-ars-t2">Bs. 0.00</strong></div>
+                    <div class="res-fila"><span>Costo Total Mercancía:</span> <strong id="costo-t2" style="color:#DC2626;">- Bs. 0.00</strong></div>
+                    <div class="res-fila" style="margin-top:10px; padding-top:10px; border-top:1px solid #A7F3D0;"><span>TOTAL CIERRE (BOB):</span> <strong id="total-cierre-t2">Bs. 0.00</strong></div>
+                    <div class="res-fila"><span>GANANCIA NETA:</span> <strong id="ganancia-t2">Bs. 0.00</strong></div>
+                </div>
+                <button class="btn btn-secundario" style="margin-top:15px;" onclick="ejecutarCierreTienda('2')">Crear Cierre (Tienda 2)</button>
+            </div>
+        </div>
+
         <div class="seccion-finanzas">
-            <div class="seccion-header-finanzas">
-                <h3>Reporte Diario</h3>
-                <span class="badge-fecha" id="fecha-hoy-display"></span>
+            <div class="seccion-header-finanzas" style="border-bottom:none; margin-bottom:5px;">
+                <h3>Historial de Ventas (Hoy)</h3>
             </div>
             
-            <div class="grid-resumen">
-                <div class="caja-resumen destacada">
-                    <p>Vendido Hoy</p>
-                    <div class="monto" id="total-vendido">$0.00</div>
-                </div>
-                <div class="caja-resumen">
-                    <p>Ganancia Neta</p>
-                    <div class="monto verde" id="total-ganancia">$0.00</div>
-                </div>
+            <div id="historial-tienda-1-container">
+                <h4 style="font-size:14px; font-weight:700; color:#475569; margin:0 0 12px 0; display:flex; align-items:center; gap:6px; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> Tienda 1
+                </h4>
+                <div id="lista-ventas-t1" style="margin-bottom: 25px;"></div>
             </div>
 
-            <div class="caja-unidades-hoy">
-                <span>Pares Vendidos Hoy</span>
-                <strong id="cantidad-vendida">0</strong>
+            <div id="historial-tienda-2-container">
+                <h4 style="font-size:14px; font-weight:700; color:#475569; margin:0 0 12px 0; display:flex; align-items:center; gap:6px; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> Tienda 2
+                </h4>
+                <div id="lista-ventas-t2"></div>
             </div>
-
-            <div style="margin-top: 20px; border-top: 1px dashed #E5E7EB; padding-top: 15px;">
-                <h4 style="font-size: 12px; color: #6B7280; text-transform: uppercase; margin-bottom: 10px; margin-top: 0;">Detalle de Ventas de Hoy</h4>
-                <div id="lista-ventas-hoy"></div>
-            </div>
-        </div>
-
-        <div class="seccion-finanzas">
-            <div class="seccion-header-finanzas">
-                <h3>Rendimiento Semanal</h3>
-            </div>
-            <div style="position: relative; width:100%; height:220px;">
-                <canvas id="graficaHistorial"></canvas>
-            </div>
-        </div>
-
-        <div class="seccion-finanzas" style="margin-bottom: 30px;">
-            <div class="seccion-header-finanzas">
-                <h3>Historial Reciente</h3>
-            </div>
-            <table class="tabla-historial">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Vendido</th>
-                        <th>Detalle</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-historial-body"></tbody>
-            </table>
         </div>
     </main>
 
-    <!-- BARRA DE NAVEGACIÓN -->
+    <!-- NAVEGACIÓN INFERIOR -->
     <nav class="bottom-nav">
-        <button class="nav-item activa" id="nav-inventario" onclick="cambiarPantalla('inventario')">
-            <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-            Inventario
-        </button>
-        <button class="nav-item" id="nav-agregar" onclick="cambiarPantalla('agregar')">
-            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-            Agregar
-        </button>
-        <button class="nav-item" id="nav-ganancias" onclick="cambiarPantalla('ganancias')">
-            <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-            Finanzas
-        </button>
+        <button class="nav-item activa" id="nav-inventario" onclick="cambiarPantalla('inventario')"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>Inventario</button>
+        <button class="nav-item" id="nav-agregar" onclick="cambiarPantalla('agregar')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>Agregar</button>
+        <button class="nav-item" id="nav-ganancias" onclick="cambiarPantalla('ganancias')"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>Finanzas</button>
     </nav>
 
-    <!-- MODAL DE TALLAS (CREACIÓN) -->
-    <div id="modal-tallas" class="modal-overlay" style="align-items: flex-end;">
+    <!-- MODAL CONFIGURAR TASA DE CAMBIO -->
+    <div id="modal-tasa-cambio" class="modal-overlay">
         <div class="modal-content">
-            <div class="talla-header" style="border:none; padding:0; margin-bottom: 5px;">
-                <h2 style="font-size: 20px; font-weight: 800; color: #111827; margin: 0;">Detalle por Talla</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="font-size:20px; font-weight:800; margin:0; display:flex; align-items:center; gap:8px;">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="#2563EB" stroke-width="2" fill="none"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+                    Tasa ARS/BOB
+                </h2>
+                <button class="modal-cerrar" onclick="cerrarModalTasa()">&times;</button>
+            </div>
+
+            <div style="background:#EFF6FF; border:1px solid #BFDBFE; border-radius:16px; padding:16px; margin-bottom:20px;">
+                <p style="margin:0 0 10px 0; font-size:14px; font-weight:600; color:#1E3A8A;">Opción 1: Automática (API Global)</p>
+                <button class="btn" style="background:#2563EB; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="obtenerTasaCambioAPI()">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    Consultar Tasa Actual
+                </button>
+            </div>
+
+            <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:16px; padding:16px;">
+                <p style="margin:0 0 10px 0; font-size:14px; font-weight:600; color:#475569;">Opción 2: Ingreso Manual</p>
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="input-tasa-manual" placeholder="Ej: 0.0079" step="0.0001" style="flex:1;">
+                    <button class="btn btn-secundario" style="width:auto; padding:14px;" onclick="guardarTasaManual()">Fijar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL VENDER (SELECCIÓN DE TALLA) -->
+    <div id="modal-seleccionar-talla" class="modal-overlay">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="font-size:20px; font-weight:800; margin:0;" id="seleccionar-talla-nombre"></h2>
+                <button class="modal-cerrar" onclick="cerrarModalSeleccionarTalla()">&times;</button>
+            </div>
+            <div id="contenedor-seleccionar-talla" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMAR VENTA -->
+    <div id="modal-confirmar-venta" class="modal-overlay">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="font-size:20px; font-weight:800; margin:0;">Registrar Venta</h2>
+                <button class="modal-cerrar" onclick="cerrarModalVenta()">&times;</button>
+            </div>
+
+            <p id="venta-producto-nombre" style="font-weight:700; font-size:16px; margin-bottom:20px;"></p>
+
+            <div class="form-group" style="box-shadow:none; padding:0; border:none;">
+                <label style="display:flex; align-items:center; gap:6px;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    Sucursal / Tienda
+                </label>
+                <div id="vendedor-tienda-lock" style="font-size:15px; font-weight:800; color:#1D4ED8; background:#DBEAFE; padding:14px; border-radius:12px; display:flex; align-items:center; gap:8px;">
+                    <span id="venta-tienda-nombre-lock">Cargando...</span>
+                </div>
+                <div id="admin-tienda-select-container" style="display:none;">
+                    <select id="venta-tienda-admin">
+                        <option value="Tienda 1">Tienda 1</option>
+                        <option value="Tienda 2">Tienda 2</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group" style="box-shadow:none; padding:0; border:none;">
+                <label style="display:flex; align-items:center; gap:6px;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+                    Moneda Recibida
+                </label>
+                <select id="venta-moneda">
+                    <option value="BOB">Bolivianos (BOB)</option>
+                    <option value="ARS">Pesos Argentinos (ARS)</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="box-shadow:none; padding:0; border:none; margin-bottom:25px;">
+                <label style="display:flex; align-items:center; gap:6px;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                    Monto Exacto Cobrado
+                </label>
+                <input type="number" id="venta-precio-final" step="0.01">
+            </div>
+
+            <button type="button" class="btn" style="background:#10B981;" onclick="ejecutarVenta()">Confirmar Pago y Vender</button>
+        </div>
+    </div>
+
+    <!-- MODALES DE TALLAS Y EDICIÓN -->
+    <div id="modal-tallas" class="modal-overlay">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="font-size:20px; font-weight:800; margin:0;">Tallas y Precios</h2>
                 <button class="modal-cerrar" onclick="cerrarModalTallas(false)">&times;</button>
             </div>
-            <p style="color: #6B7280; font-size: 14px; margin-bottom: 25px; margin-top: 0;">Indica cantidad, costo y precio de venta para las tallas que recibiste.</p>
             <div id="contenedor-lista-tallas"></div>
-            <button type="button" class="btn" style="margin-top: 15px;" onclick="cerrarModalTallas(true)">Guardar Configuración</button>
+            <button type="button" class="btn" style="margin-top:20px;" onclick="cerrarModalTallas(true)">Guardar Configuración</button>
         </div>
     </div>
-
-    <!-- MODAL DE EDICIÓN DE PRODUCTO / TALLAS / ELIMINAR -->
-    <div id="modal-editar-producto" class="modal-overlay" style="align-items: flex-end;">
+    
+    <div id="modal-editar-producto" class="modal-overlay">
         <div class="modal-content">
-            <div class="talla-header" style="border-bottom: 1px solid #E5E7EB; padding-bottom: 15px; margin-bottom: 15px;">
-                <div>
-                    <h2 style="font-size: 18px; font-weight: 800; color: #111827; margin: 0;">Editar Producto</h2>
-                    <span id="edit-modal-subtitle" style="font-size: 13px; color: #6B7280;">Modifica precios, stock o elimina el modelo</span>
-                </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="font-size:20px; font-weight:800; margin:0;">Editar Zapato</h2>
                 <button class="modal-cerrar" onclick="cerrarModalEdicion()">&times;</button>
             </div>
-
-            <div class="form-group">
-                <label>Modelo del Zapato</label>
+            <div class="form-group" style="padding:0; box-shadow:none; border:none;">
+                <label>Nombre del Modelo</label>
                 <input type="text" id="edit-nombre-zapato">
             </div>
-
-            <h4 style="font-size: 13px; color: #6B7280; text-transform: uppercase; margin-bottom: 10px; margin-top: 15px;">Gestión de Tallas y Precios</h4>
             <div id="contenedor-editar-tallas"></div>
-
-            <div style="display: flex; gap: 10px; margin-top: 25px; margin-bottom: 10px;">
-                <button type="button" class="btn" style="flex: 1;" onclick="guardarCambiosProducto()">Actualizar Cambios</button>
-                <button type="button" class="btn btn-peligro" style="flex: 1;" onclick="eliminarModeloZapato()">Eliminar Modelo</button>
+            <div style="display:flex; gap:12px; margin-top:25px;">
+                <button type="button" class="btn" style="flex:1;" onclick="guardarCambiosProducto()">Actualizar</button>
+                <button type="button" class="btn btn-peligro" style="flex:1;" onclick="eliminarModeloZapato()">Borrar</button>
             </div>
-        </div>
-    </div>
-
-    <!-- MODAL DE REPORTE DIARIO -->
-    <div id="modal-reporte-dia" class="modal-overlay" style="align-items: flex-end;">
-        <div class="modal-content">
-            <div class="talla-header" style="border-bottom: 1px solid #E5E7EB; padding-bottom: 15px; margin-bottom: 15px;">
-                <div>
-                    <h2 style="font-size: 18px; font-weight: 800; color: #111827; margin: 0;">Reporte de Ventas</h2>
-                    <span id="modal-reporte-fecha" style="font-size: 13px; color: #6B7280;"></span>
-                </div>
-                <button class="modal-cerrar" onclick="cerrarModalReporte()">&times;</button>
-            </div>
-            
-            <div class="grid-resumen" style="margin-bottom: 20px;">
-                <div class="caja-resumen destacada" style="padding: 12px;">
-                    <p style="font-size:10px;">Vendido</p>
-                    <div class="monto" id="modal-reporte-vendido" style="font-size:18px;">$0.00</div>
-                </div>
-                <div class="caja-resumen" style="padding: 12px;">
-                    <p style="font-size:10px;">Ganancia</p>
-                    <div class="monto verde" id="modal-reporte-ganancia" style="font-size:18px;">$0.00</div>
-                </div>
-            </div>
-
-            <h4 style="font-size: 12px; color: #6B7280; text-transform: uppercase; margin-bottom: 10px; margin-top: 0;">Productos Vendidos</h4>
-            <div id="modal-reporte-lista"></div>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        // CONFIGURACIÓN DE SUPABASE
-        // ==========================================
+        const API_KEY_EXCHANGE = '265b6b22fdfffb2da532137d';
+        let tasaARS_BOB = null; 
+        let dataTiendasGlobal = { 'Tienda 1': {}, 'Tienda 2': {} }; 
+        let tiendaActiva = localStorage.getItem('tienda_activa'); 
+        let clienteGeneralId = null; 
+
         const SUPABASE_URL = 'https://luwcggpjvsrhvdwjiarw.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1d2NnZ3BqdnNyaHZkd2ppYXJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2NjE4NTcsImV4cCI6MjA4MzIzNzg1N30.L_Yl3cVXdvLGcz3VZD-icJXAE4_myxqGo6o5dAkKw0M';
-        
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let tallasConfiguradas = [];
+        let currentRole = 'vendedor';
         let productos = [];
-        let chartInstancia = null;
+        let tallasConfiguradas = [];
         let productoEnEdicionIndex = null;
+        let ventaPendiente = null;
+        
+        let ventasOffline = JSON.parse(localStorage.getItem('ventas_offline') || '[]');
 
-        // ==========================================
-        // FUNCIONES DEL LOADER (SPINNER)
-        // ==========================================
-        function mostrarLoader(texto) {
-            document.getElementById('loader-text').innerText = texto;
-            document.getElementById('loader-overlay').style.display = 'flex';
+        function actualizarEstadoConexion() {
+            const badge = document.getElementById('badge-conexion');
+            const btnSync = document.getElementById('btn-sync');
+            
+            if (navigator.onLine) {
+                if (ventasOffline.length > 0) {
+                    badge.innerText = "Pendiente Sync";
+                    badge.style.background = "#F59E0B"; 
+                    btnSync.style.display = "flex";
+                } else {
+                    badge.innerText = "Online";
+                    badge.style.background = "#10B981"; 
+                    btnSync.style.display = "none";
+                }
+            } else {
+                badge.innerText = "Offline";
+                badge.style.background = "#EF4444"; 
+                btnSync.style.display = "none";
+            }
         }
 
-        function ocultarLoader() {
-            document.getElementById('loader-overlay').style.display = 'none';
+        window.addEventListener('online', () => {
+            actualizarEstadoConexion();
+            sincronizarVentasOffline();
+        });
+        
+        window.addEventListener('offline', actualizarEstadoConexion);
+
+        async function sincronizarVentasOffline() {
+    if (ventasOffline.length === 0 || !navigator.onLine) return;
+    mostrarLoader("Sincronizando ventas locales...");
+    if (!clienteGeneralId) await verificarClienteGeneral();
+
+    let ventasExitosas = []; // guardaremos las que se suban bien
+
+    try {
+        for (let v of ventasOffline) {
+            try {
+                // 1. Insertar la venta principal
+                const { data: saleData, error: saleError } = await supabaseClient
+                    .from('sales')
+                    .insert([{ 
+                        client_id: clienteGeneralId,
+                        store: v.tienda,
+                        currency: v.moneda,
+                        original_amount: v.monto,
+                        total_amount: v.monto 
+                    }])
+                    .select();
+
+                if (saleError || !saleData || saleData.length === 0) {
+                    console.warn("No se pudo insertar 'sales' para venta local:", v.id, saleError);
+                    continue; // esta venta se reintentará luego
+                }
+
+                const saleId = saleData[0].id;
+
+                // 2. Insertar el detalle de la venta
+                const { error: itemError } = await supabaseClient
+                    .from('sale_items')
+                    .insert([{
+                        sale_id: saleId,
+                        shoe_id: v.zapato_id,
+                        size: v.talla,
+                        quantity: 1,
+                        unit_price: v.monto,
+                        unit_cost: v.costo
+                    }]);
+
+                if (itemError) {
+                    console.warn("Error en sale_items, se cancela esta venta:", itemError);
+                    // Eliminar la venta principal que ya se creó (rollback)
+                    await supabaseClient.from('sales').delete().eq('id', saleId);
+                    continue; // se reintentará luego
+                }
+
+                // 3. Actualizar stock
+                const { data: stockData } = await supabaseClient
+                    .from('shoe_stock')
+                    .select('quantity')
+                    .eq('id', v.stock_id)
+                    .single();
+
+                if (stockData) {
+                    await supabaseClient
+                        .from('shoe_stock')
+                        .update({ quantity: stockData.quantity - 1 })
+                        .eq('id', v.stock_id);
+                }
+
+                // Si llegamos aquí, la venta se subió completamente
+                ventasExitosas.push(v.id);
+            } catch (innerError) {
+                console.error("Error procesando venta offline:", v.id, innerError);
+                // Se continuará con la siguiente, y esta quedará para reintentar
+            }
         }
 
-        // ==========================================
-        // FUNCIÓN PARA COMPRIMIR IMÁGENES
-        // ==========================================
-        function comprimirImagen(file, maxWidth, maxHeight, quality) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = event => {
-                    const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        let width = img.width;
-                        let height = img.height;
+        // Eliminar solo las ventas que se sincronizaron correctamente
+        ventasOffline = ventasOffline.filter(v => !ventasExitosas.includes(v.id));
+        localStorage.setItem('ventas_offline', JSON.stringify(ventasOffline));
 
-                        if (width > maxWidth) {
-                            height = Math.round((height * maxWidth) / width);
-                            width = maxWidth;
-                        }
-                        if (height > maxHeight) {
-                            width = Math.round((width * maxHeight) / height);
-                            height = maxHeight;
-                        }
+        if (ventasExitosas.length > 0) {
+            const badge = document.getElementById('badge-conexion');
+            badge.innerText = `¡${ventasExitosas.length} subidas!`;
+            badge.style.background = "#3B82F6";
+            setTimeout(() => actualizarEstadoConexion(), 4000);
+            await cargarDatosDesdeSupabase(); // refrescar inventario e historial
+        }
 
-                        const canvas = document.createElement('canvas');
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        canvas.toBlob(blob => {
-                            resolve(blob);
-                        }, 'image/jpeg', quality);
-                    };
-                    img.onerror = error => reject(error);
-                };
-            });
+        ocultarLoader();
+    } catch (err) {
+        ocultarLoader();
+        console.error("Error general en sincronización:", err);
+        alert("Hubo un problema al sincronizar. Se intentará más tarde.");
+    }
+}
+        async function verificarClienteGeneral() {
+            try {
+                if(!navigator.onLine) return; 
+                let { data, error } = await supabaseClient.from('clients').select('id').limit(1);
+                if (data && data.length > 0) {
+                    clienteGeneralId = data[0].id;
+                } else {
+                    let { data: newClient, error: errNew } = await supabaseClient.from('clients').insert([{ name: 'Cliente General', phone: '00000000' }]).select();
+                    if (newClient && newClient.length > 0) clienteGeneralId = newClient[0].id;
+                }
+            } catch (e) {
+                console.error("Error obteniendo cliente general:", e);
+            }
+        }
+
+        function actualizarVisibilidadHistorial() {
+            const h1 = document.getElementById('historial-tienda-1-container');
+            const h2 = document.getElementById('historial-tienda-2-container');
+            if (!h1 || !h2) return;
+            
+            if (currentRole === 'admin') {
+                h1.style.display = 'block';
+                h2.style.display = 'block';
+            } else {
+                h1.style.display = (tiendaActiva === 'Tienda 1') ? 'block' : 'none';
+                h2.style.display = (tiendaActiva === 'Tienda 2') ? 'block' : 'none';
+            }
+        }
+
+        function verificarCodigoTienda() {
+            let codigo = document.getElementById('input-codigo-tienda').value.trim();
+            if (codigo === '1111') {
+                localStorage.setItem('tienda_activa', 'Tienda 1');
+                tiendaActiva = 'Tienda 1';
+                cerrarModalBloqueo();
+            } else if (codigo === '2222') {
+                localStorage.setItem('tienda_activa', 'Tienda 2');
+                tiendaActiva = 'Tienda 2';
+                cerrarModalBloqueo();
+            } else if (codigo === '123456789') {
+                currentRole = 'admin';
+                document.body.classList.remove('role-vendedor');
+                document.getElementById('btn-admin-toggle').innerText = 'Salir Admin';
+                tiendaActiva = 'ADMIN GLOBAL'; 
+                cerrarModalBloqueo();
+                alert("Acceso de Administrador Global concedido.");
+            } else {
+                alert("Código incorrecto.");
+                document.getElementById('input-codigo-tienda').value = '';
+            }
+            actualizarVisibilidadHistorial();
+        }
+
+        function cerrarModalBloqueo() {
+            document.getElementById('modal-codigo-tienda').style.display = 'none';
+            document.getElementById('indicador-tienda-header').innerText = tiendaActiva;
+        }
+
+        function resetearTienda() {
+            if (confirm("¿Deseas cerrar sesión de esta tienda y vincular otra?")) {
+                localStorage.removeItem('tienda_activa');
+                location.reload();
+            }
+        }
+
+        function toggleAdmin() {
+            if (currentRole === 'vendedor') {
+                const pass = prompt("Contraseña de Admin:");
+                if (pass === "123456789") {
+                    currentRole = 'admin';
+                    document.body.classList.remove('role-vendedor');
+                    document.getElementById('btn-admin-toggle').innerText = 'Salir Admin';
+                    document.getElementById('indicador-tienda-header').innerText = 'ADMIN GLOBAL';
+                    alert("Modo Administrador Global Activado.");
+                } else if (pass) alert("Contraseña incorrecta.");
+            } else {
+                currentRole = 'vendedor';
+                document.body.classList.add('role-vendedor');
+                document.getElementById('btn-admin-toggle').innerText = 'Entrar Admin';
+                document.getElementById('indicador-tienda-header').innerText = tiendaActiva !== 'ADMIN GLOBAL' ? tiendaActiva : 'Tienda 1';
+                cambiarPantalla('inventario');
+            }
+            actualizarVisibilidadHistorial();
+        }
+
+        function abrirModalTasa() {
+            document.getElementById('modal-tasa-cambio').style.display = 'flex';
+        }
+
+        function cerrarModalTasa() {
+            document.getElementById('modal-tasa-cambio').style.display = 'none';
+        }
+
+        function guardarTasaManual() {
+            const val = parseFloat(document.getElementById('input-tasa-manual').value);
+            if (isNaN(val) || val <= 0) {
+                return alert("Por favor ingresa una tasa de cambio válida.");
+            }
+            tasaARS_BOB = val;
+            document.getElementById('badge-tasa-api').innerText = `1 ARS = ${tasaARS_BOB.toFixed(5)} BOB (Manual)`;
+            cerrarModalTasa();
+        }
+
+        async function obtenerTasaCambioAPI() {
+            if (!navigator.onLine) {
+                alert("No hay internet para consultar la API. Usa la opción manual.");
+                return;
+            }
+            mostrarLoader("Consultando API...");
+            try {
+                const res = await fetch(`https://v6.exchangerate-api.com/v6/${API_KEY_EXCHANGE}/pair/ARS/BOB`);
+                const data = await res.json();
+                if (data.result === 'success') {
+                    tasaARS_BOB = data.conversion_rate;
+                    document.getElementById('badge-tasa-api').innerText = `1 ARS = ${tasaARS_BOB.toFixed(5)} BOB (API)`;
+                    cerrarModalTasa();
+                    alert("Tasa actualizada con éxito mediante la API.");
+                }
+            } catch (err) { 
+                cerrarModalTasa();
+                alert("Error de conexión. Por favor, usa la opción de ingreso manual."); 
+            }
+            ocultarLoader();
         }
 
         window.onload = async function() {
+            actualizarEstadoConexion(); 
+            await verificarClienteGeneral();
+            if (!tiendaActiva) {
+                document.getElementById('modal-codigo-tienda').style.display = 'flex';
+            } else {
+                document.getElementById('indicador-tienda-header').innerText = tiendaActiva;
+                actualizarVisibilidadHistorial();
+            }
+
             const contenedorTallas = document.getElementById('contenedor-lista-tallas');
             for(let i = 35; i <= 45; i++) {
                 const div = document.createElement('div');
-                div.className = 'item-talla-fila';
+                div.style.background = "#F8FAFC"; div.style.padding = "12px"; div.style.marginBottom = "10px"; div.style.borderRadius = "12px";
                 div.innerHTML = `
                     <label>Talla ${i}</label>
-                    <div class="inputs-grid">
-                        <div>
-                            <span style="font-size: 12px; font-weight: 600; color: #6B7280; margin-bottom: 4px; display: block;">Cantidad</span>
-                            <input type="number" id="cant-${i}" min="0" value="0" placeholder="Cant">
-                        </div>
-                        <div>
-                            <span style="font-size: 12px; font-weight: 600; color: #6B7280; margin-bottom: 4px; display: block;">Costo ($)</span>
-                            <input type="number" id="costo-${i}" min="0" step="0.01" value="0" placeholder="Costo">
-                        </div>
-                        <div>
-                            <span style="font-size: 12px; font-weight: 600; color: #6B7280; margin-bottom: 4px; display: block;">Precio ($)</span>
-                            <input type="number" id="precio-${i}" min="0" step="0.01" value="0" placeholder="Precio">
-                        </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                        <div><span style="font-size:11px;">Stock</span><input type="number" id="cant-${i}" value="0"></div>
+                        <div><span style="font-size:11px;">Costo</span><input type="number" id="costo-${i}" value="0" step="0.01"></div>
+                        <div><span style="font-size:11px;">Precio</span><input type="number" id="precio-${i}" value="0" step="0.01"></div>
                     </div>
                 `;
                 contenedorTallas.appendChild(div);
             }
-
-            document.getElementById('fecha-hoy-display').innerText = new Date().toLocaleDateString('es-ES');
             await cargarDatosDesdeSupabase();
         };
 
         async function cargarDatosDesdeSupabase() {
             try {
-                const { data: shoesData, error: shoesError } = await supabaseClient
-                    .from('shoes')
-                    .select('*, shoe_stock(id, size, quantity)');
+                if (!navigator.onLine) throw new Error("Estás sin conexión");
 
-                if (shoesError) throw shoesError;
+                const { data: shoesData, error: fetchError } = await supabaseClient.from('shoes').select('*, shoe_stock(id, size, quantity)');
+                if (fetchError) throw fetchError;
 
-                productos = shoesData.map(shoe => {
-                    return {
-                        id: shoe.id,
-                        nombre: shoe.description,
-                        costo_base: shoe.cost,
-                        precio_base: shoe.selling_price,
-                        foto: shoe.photo_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff',
-                        tallas: shoe.shoe_stock.map(st => ({
-                            stock_id: st.id,
-                            talla: st.size,
-                            cantidad: st.quantity,
-                            costo: shoe.cost,
-                            precio: shoe.selling_price,
-                            ganancia: shoe.selling_price - shoe.cost
-                        }))
-                    };
-                });
-
-                renderizarInventario();
-                await actualizarUIFinanzasSupabase();
-            } catch (err) {
-                console.error("Error cargando desde Supabase:", err.message);
-            }
-        }
-
-        function cambiarPantalla(pantalla) {
-            document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('activa'));
-
-            document.getElementById('pantalla-' + pantalla).classList.add('activa');
-            document.getElementById('nav-' + pantalla).classList.add('activa');
-
-            const titulos = { 'inventario': 'Mi Inventario', 'agregar': 'Nuevo Zapato', 'ganancias': 'Finanzas e Historial' };
-            document.getElementById('titulo-header').innerText = titulos[pantalla];
-
-            if(pantalla === 'ganancias') actualizarUIFinanzasSupabase();
-        }
-
-        function abrirModalTallas() { document.getElementById('modal-tallas').style.display = 'flex'; }
-        
-        function cerrarModalTallas(guardar) {
-            if (guardar) {
-                tallasConfiguradas = [];
-                for(let i = 35; i <= 45; i++) {
-                    let cantidad = parseInt(document.getElementById(`cant-${i}`).value) || 0;
-                    let costo = parseFloat(document.getElementById(`costo-${i}`).value) || 0;
-                    let precio = parseFloat(document.getElementById(`precio-${i}`).value) || 0;
-
-                    if(cantidad > 0) {
-                        tallasConfiguradas.push({
-                            talla: i,
-                            cantidad: cantidad,
-                            costo: costo,
-                            precio: precio,
-                            ganancia: precio - costo
-                        });
-                    }
-                }
-                actualizarTextoTallas();
-            }
-            document.getElementById('modal-tallas').style.display = 'none';
-        }
-
-        function actualizarTextoTallas() {
-            const texto = document.getElementById('texto-tallas-seleccionadas');
-            if(tallasConfiguradas.length > 0) {
-                let desc = tallasConfiguradas.map(t => `${t.talla} (x${t.cantidad})`);
-                texto.innerText = "Agregadas: " + desc.join(', ');
-                texto.style.color = '#111827'; texto.style.fontWeight = '600';
-            } else {
-                texto.innerText = "Ninguna talla configurada aún.";
-                texto.style.color = '#6B7280'; texto.style.fontWeight = 'normal';
-            }
-        }
-
-        // ==========================================
-        // GUARDAR PRODUCTO NUEVO
-        // ==========================================
-        document.getElementById('form-producto').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            if(tallasConfiguradas.length === 0) return alert("Debes configurar al menos una talla con cantidad.");
-
-            const nombre = document.getElementById('nombre-zapato').value;
-            const fotoInput = document.getElementById('foto-zapato');
-            const file = fotoInput.files[0];
-            
-            if(!file) return alert("Por favor selecciona una foto.");
-
-            const costoBase = tallasConfiguradas[0].costo;
-            const precioBase = tallasConfiguradas[0].precio;
-
-            try {
-                mostrarLoader("Comprimiendo la imagen...");
-                const blobComprimido = await comprimirImagen(file, 800, 800, 0.8);
-
-                mostrarLoader("Subiendo imagen al servidor...");
-                const fileExt = file.name.split('.').pop() || 'jpg';
-                const fileName = `zapato_${Date.now()}.${fileExt}`;
-
-                const { data: uploadData, error: uploadError } = await supabaseClient
-                    .storage
-                    .from('shoe_images')
-                    .upload(fileName, blobComprimido, {
-                        contentType: file.type || 'image/jpeg'
-                    });
-
-                if (uploadError) throw uploadError;
-
-                const { data: publicUrlData } = supabaseClient
-                    .storage
-                    .from('shoe_images')
-                    .getPublicUrl(fileName);
-                
-                const fotoUrl = publicUrlData.publicUrl;
-
-                mostrarLoader("Guardando datos en inventario...");
-                
-                const { data: shoeData, error: shoeError } = await supabaseClient
-                    .from('shoes')
-                    .insert([{ 
-                        description: nombre, 
-                        cost: costoBase, 
-                        selling_price: precioBase,
-                        photo_url: fotoUrl 
-                    }])
-                    .select();
-
-                if (shoeError) throw shoeError;
-                const newShoeId = shoeData[0].id;
-
-                const stockRecords = tallasConfiguradas.map(t => ({
-                    shoe_id: newShoeId,
-                    size: t.talla,
-                    quantity: t.cantidad
+                productos = shoesData.map(shoe => ({
+                    id: shoe.id, nombre: shoe.description, costo_base: shoe.cost, precio_base: shoe.selling_price,
+                    foto: shoe.photo_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff',
+                    tallas: shoe.shoe_stock.map(st => ({ stock_id: st.id, talla: st.size, cantidad: st.quantity, costo: shoe.cost, precio: shoe.selling_price }))
                 }));
 
-                const { error: stockError } = await supabaseClient
-                    .from('shoe_stock')
-                    .insert(stockRecords);
-
-                if (stockError) throw stockError;
-
-                document.getElementById('form-producto').reset();
-                tallasConfiguradas = [];
-                for(let i = 35; i <= 45; i++) {
-                    document.getElementById(`cant-${i}`).value = 0;
-                    document.getElementById(`costo-${i}`).value = 0;
-                    document.getElementById(`precio-${i}`).value = 0;
-                }
-                actualizarTextoTallas();
+                localStorage.setItem('inventario_cache', JSON.stringify(productos));
                 
-                await cargarDatosDesdeSupabase();
-                ocultarLoader();
-                cambiarPantalla('inventario');
-
-            } catch (err) {
-                ocultarLoader();
-                alert("Error al guardar: " + err.message);
+                renderizarInventario(productos);
+                await actualizarUIFinanzasSupabase();
+            } catch (err) { 
+                console.warn("Cargando desde el Caché Local. Razón: ", err.message);
+                const cache = localStorage.getItem('inventario_cache');
+                if (cache) {
+                    productos = JSON.parse(cache);
+                    renderizarInventario(productos);
+                    document.getElementById('estado-vacio').style.display = productos.length === 0 ? 'block' : 'none';
+                    await actualizarUIFinanzasSupabase(); 
+                } else {
+                    document.getElementById('estado-vacio').innerHTML = '<p>No hay inventario guardado ni conexión a internet.</p>';
+                    document.getElementById('estado-vacio').style.display = 'block';
+                }
             }
-        });
+        }
 
-        function renderizarInventario() {
+        function renderizarInventario(lista = productos) {
             const contenedor = document.getElementById('contenedor-productos');
             contenedor.innerHTML = '';
-            document.getElementById('estado-vacio').style.display = productos.length > 0 ? 'none' : 'block';
-
-            productos.forEach((prod, indexProd) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                // Al hacer clic en la tarjeta (fuera del botón vender), abre la edición
-                card.onclick = (e) => {
-                    if (e.target.closest('.btn-vender')) return;
-                    abrirModalEdicion(indexProd);
-                };
+            let mostrados = 0;
+            const iconoTalla = `<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" style="vertical-align: text-top; margin-right: 4px;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>`;
+            
+            lista.forEach((prod) => {
+                if (prod.nombre.startsWith('[ARCHIVADO]')) return;
+                mostrados++;
+                const indexProd = productos.findIndex(p => p.id === prod.id);
+                let tallasDisp = prod.tallas.filter(t => t.cantidad > 0).map(t => t.talla).sort((a,b)=>a-b).join(', ');
+                const card = document.createElement('div'); card.className = 'card';
                 
-                let htmlTallasDetalle = '';
-                prod.tallas.forEach((item, indexTalla) => {
-                    let stockClass = item.cantidad > 0 ? 'stock-ok' : 'stock-out';
-                    let stockText = item.cantidad > 0 ? `${item.cantidad} disponibles` : `Agotado`;
-                    let btnDisabled = item.cantidad <= 0 ? 'disabled' : '';
-
-                    htmlTallasDetalle += `
-                        <div class="talla-card">
-                            <div class="talla-header">
-                                <span class="talla-numero">Talla ${item.talla}</span>
-                                <span class="talla-stock ${stockClass}">${stockText}</span>
-                            </div>
-                            <div class="talla-body">
-                                <div class="talla-finanzas">
-                                    <div class="precio-item"><span class="lbl">Precio:</span> <strong style="color: #111827; font-size: 14px;">$${item.precio.toFixed(2)}</strong></div>
-                                    <div class="precio-item"><span class="lbl">Costo:</span> $${item.costo.toFixed(2)}</div>
-                                    <div class="precio-item ganancia"><span class="lbl">Ganancia:</span> +$${item.ganancia.toFixed(2)}</div>
-                                </div>
-                                <div>
-                                    <button class="btn-vender" ${btnDisabled} onclick="event.stopPropagation(); venderTallaSupabase(${indexProd}, ${indexTalla})">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                                            <line x1="3" y1="6" x2="21" y2="6"></line>
-                                            <path d="M16 10a4 4 0 0 1-8 0"></path>
-                                        </svg>
-                                        Vender
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-
                 card.innerHTML = `
-                    <img src="${prod.foto}" alt="${prod.nombre}">
+                    <img src="${prod.foto}" onclick="abrirModalSeleccionarTalla(${indexProd})">
                     <div class="card-body">
                         <h3 class="card-title">${prod.nombre}</h3>
-                        <div class="tallas-container">
-                            ${htmlTallasDetalle}
+                        <p style="font-size:13px; color:#64748B; margin-bottom:15px; font-weight:600;">${tallasDisp ? iconoTalla + 'Tallas: ' + tallasDisp : '<span style="color:#EF4444;">Agotado</span>'}</p>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn btn-secundario btn-editar-admin" style="flex: 0 0 auto; padding:14px; border-radius:14px; display:flex; align-items:center; justify-content:center;" onclick="abrirModalEdicion(${indexProd})">
+                                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            </button>
+                            <button class="btn" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="abrirModalSeleccionarTalla(${indexProd})">
+                                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                                Vender
+                            </button>
                         </div>
                     </div>
                 `;
                 contenedor.appendChild(card);
             });
+            document.getElementById('estado-vacio').style.display = mostrados === 0 ? 'block' : 'none';
         }
 
-        // ==========================================
-        // MODAL DE EDICIÓN, AJUSTES +/- Y ELIMINACIÓN
-        // ==========================================
-        function abrirModalEdicion(indexProd) {
-            productoEnEdicionIndex = indexProd;
+        function abrirModalSeleccionarTalla(indexProd) {
             let prod = productos[indexProd];
-
-            document.getElementById('edit-nombre-zapato').value = prod.nombre;
-            
-            const contenedorTallasEdit = document.getElementById('contenedor-editar-tallas');
-            contenedorTallasEdit.innerHTML = '';
-
-            prod.tallas.forEach((t, i) => {
-                const fila = document.createElement('div');
-                fila.className = 'item-talla-fila';
-                fila.innerHTML = `
-                    <label>Talla ${t.talla}</label>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-                        <div>
-                            <span style="font-size: 11px; font-weight: 600; color: #6B7280; margin-bottom: 4px; display: block;">Costo ($)</span>
-                            <input type="number" id="edit-costo-${i}" step="0.01" value="${t.costo}">
-                        </div>
-                        <div>
-                            <span style="font-size: 11px; font-weight: 600; color: #6B7280; margin-bottom: 4px; display: block;">Precio ($)</span>
-                            <input type="number" id="edit-precio-${i}" step="0.01" value="${t.precio}">
-                        </div>
-                    </div>
-                    <div>
-                        <span style="font-size: 11px; font-weight: 600; color: #6B7280; margin-bottom: 4px; display: block;">Cantidad Disponible</span>
-                        <div class="control-cantidad-grupo">
-                            <button type="button" class="btn-stepper" onclick="modificarCantidadSteper(${i}, -1)">-</button>
-                            <input type="number" id="edit-cant-${i}" min="0" value="${t.cantidad}" style="text-align: center; font-weight: 700;">
-                            <button type="button" class="btn-stepper" onclick="modificarCantidadSteper(${i}, 1)">+</button>
-                        </div>
+            document.getElementById('seleccionar-talla-nombre').innerText = prod.nombre;
+            let contenedor = document.getElementById('contenedor-seleccionar-talla'); contenedor.innerHTML = '';
+            prod.tallas.forEach((item, indexTalla) => {
+                let colorStock = item.cantidad > 0 ? '#10B981' : '#EF4444';
+                contenedor.innerHTML += `
+                    <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:15px; border-radius:16px; display:flex; justify-content:space-between; align-items:center;">
+                        <div><div style="font-size:16px; font-weight:800;">Talla ${item.talla}</div><div style="font-size:12px; font-weight:700; color:${colorStock};">${item.cantidad} disp.</div></div>
+                        <button class="btn" style="width:auto; padding:10px 16px; border-radius:12px;" ${item.cantidad <= 0 ? 'disabled' : ''} onclick="cerrarModalSeleccionarTalla(); abrirModalVenta(${indexProd}, ${indexTalla})">Cobrar</button>
                     </div>
                 `;
-                contenedorTallasEdit.appendChild(fila);
             });
-
-            document.getElementById('modal-editar-producto').style.display = 'flex';
+            document.getElementById('modal-seleccionar-talla').style.display = 'flex';
         }
 
-        function cerrarModalEdicion() {
-            document.getElementById('modal-editar-producto').style.display = 'none';
-            productoEnEdicionIndex = null;
-        }
-
-        function modificarCantidadSteper(indexTalla, cambio) {
-            const input = document.getElementById(`edit-cant-${indexTalla}`);
-            let val = parseInt(input.value) || 0;
-            val += cambio;
-            if (val < 0) val = 0;
-            input.value = val;
-        }
-
-        async function guardarCambiosProducto() {
-            if (productoEnEdicionIndex === null) return;
-            let prod = productos[productoEnEdicionIndex];
-
-            const nuevoNombre = document.getElementById('edit-nombre-zapato').value.trim();
-            if (!nuevoNombre) return alert("El nombre del modelo no puede estar vacío.");
-
-            mostrarLoader("Actualizando producto...");
-
-            try {
-                let nuevoCostoBase = prod.costo_base;
-                let nuevoPrecioBase = prod.precio_base;
-                if (prod.tallas.length > 0) {
-                    nuevoCostoBase = parseFloat(document.getElementById(`edit-costo-0`).value) || prod.costo_base;
-                    nuevoPrecioBase = parseFloat(document.getElementById(`edit-precio-0`).value) || prod.precio_base;
-                }
-
-                // 1. Actualizar datos principales del zapato
-                const { error: errorZapato } = await supabaseClient
-                    .from('shoes')
-                    .update({ 
-                        description: nuevoNombre,
-                        cost: nuevoCostoBase,
-                        selling_price: nuevoPrecioBase
-                    })
-                    .eq('id', prod.id);
-
-                if (errorZapato) throw errorZapato;
-
-                // 2. Actualizar stock y precios individuales por talla
-                for (let i = 0; i < prod.tallas.length; i++) {
-                    let t = prod.tallas[i];
-                    let nuevaCant = parseInt(document.getElementById(`edit-cant-${i}`).value) || 0;
-                    let nuevoCosto = parseFloat(document.getElementById(`edit-costo-${i}`).value) || t.costo;
-                    let nuevoPrecio = parseFloat(document.getElementById(`edit-precio-${i}`).value) || t.precio;
-
-                    const { error: errorStock } = await supabaseClient
-                        .from('shoe_stock')
-                        .update({ quantity: nuevaCant })
-                        .eq('id', t.stock_id);
-
-                    if (errorStock) throw errorStock;
-
-                    // Si deseas actualizar también costo/precio general o por talla si la tabla lo soporta
-                    const { error: errorPrecioZapato } = await supabaseClient
-                        .from('shoes')
-                        .update({ cost: nuevoCosto, selling_price: nuevoPrecio })
-                        .eq('id', prod.id);
-                        
-                    if (errorPrecioZapato) throw errorPrecioZapato;
-                }
-
-                cerrarModalEdicion();
-                await cargarDatosDesdeSupabase();
-                ocultarLoader();
-            } catch (err) {
-                ocultarLoader();
-                alert("Error al actualizar: " + err.message);
+        function abrirModalVenta(indexProd, indexTalla) {
+            let prod = productos[indexProd];
+            let tallaObj = prod.tallas[indexTalla];
+            ventaPendiente = { prod, tallaObj };
+            document.getElementById('venta-producto-nombre').innerText = `${prod.nombre} - Talla ${tallaObj.talla}`;
+            
+            if (currentRole === 'admin') {
+                document.getElementById('admin-tienda-select-container').style.display = 'block';
+                document.getElementById('vendedor-tienda-lock').style.display = 'none';
+            } else {
+                document.getElementById('admin-tienda-select-container').style.display = 'none';
+                document.getElementById('vendedor-tienda-lock').style.display = 'flex';
+                document.getElementById('venta-tienda-nombre-lock').innerText = tiendaActiva;
             }
+
+            document.getElementById('venta-precio-final').value = tallaObj.precio.toFixed(2);
+            document.getElementById('venta-moneda').value = 'BOB';
+            document.getElementById('modal-confirmar-venta').style.display = 'flex';
         }
 
-        async function eliminarModeloZapato() {
-            if (productoEnEdicionIndex === null) return;
-            let prod = productos[productoEnEdicionIndex];
+        async function ejecutarVenta() {
+            if (!ventaPendiente) return;
 
-            if (!confirm(`¿Estás seguro de eliminar por completo el modelo "${prod.nombre}" del inventario? Esta acción no se puede deshacer.`)) {
+            let tiendaDestino = "";
+            if (currentRole === 'admin') {
+                tiendaDestino = document.getElementById('venta-tienda-admin').value;
+            } else {
+                if (!tiendaActiva || tiendaActiva === 'ADMIN GLOBAL') return alert("Error: Selecciona una tienda válida.");
+                tiendaDestino = tiendaActiva;
+            }
+
+            let { prod, tallaObj } = ventaPendiente;
+            let moneda = document.getElementById('venta-moneda').value;
+            let montoIngresado = parseFloat(document.getElementById('venta-precio-final').value);
+
+            if (isNaN(montoIngresado) || montoIngresado <= 0) return alert("Ingresa un monto válido.");
+
+            cerrarModalVenta();
+
+            if (!navigator.onLine) {
+                let ventaLocal = {
+                    id: 'local_' + Date.now(),
+                    zapato_id: prod.id,
+                    nombre: prod.nombre,  
+                    foto: prod.foto,
+                    talla: tallaObj.talla,
+                    tienda: tiendaDestino,
+                    moneda: moneda,
+                    monto: montoIngresado,
+                    costo: tallaObj.costo,
+                    stock_id: tallaObj.stock_id,
+                    fecha: new Date().toISOString()
+                };
+                
+                ventasOffline.push(ventaLocal);
+                localStorage.setItem('ventas_offline', JSON.stringify(ventasOffline));
+                
+                tallaObj.cantidad -= 1;
+                localStorage.setItem('inventario_cache', JSON.stringify(productos)); 
+                renderizarInventario(); 
+                actualizarEstadoConexion(); 
+                actualizarUIFinanzasSupabase(); 
+                
                 return;
             }
 
-            mostrarLoader("Eliminando modelo...");
+            mostrarLoader("Guardando Venta...");
+            if (!clienteGeneralId) await verificarClienteGeneral();
 
             try {
-                // Supabase eliminará en cascada si está configurado, o borramos stock e items relacionados primero si es necesario.
-                // Intentamos eliminar primero los stocks dependientes
-                await supabaseClient.from('shoe_stock').delete().eq('shoe_id', prod.id);
-                
-                // Eliminamos el registro del zapato
-                const { error: errorDel } = await supabaseClient
-                    .from('shoes')
-                    .delete()
-                    .eq('id', prod.id);
+                const { data: saleData, error: saleError } = await supabaseClient.from('sales').insert([{ 
+                    client_id: clienteGeneralId,
+                    store: tiendaDestino,
+                    currency: moneda,
+                    original_amount: montoIngresado,
+                    total_amount: montoIngresado 
+                }]).select();
 
-                if (errorDel) throw errorDel;
+                if (saleError) throw new Error(saleError.message);
+                if (!saleData || saleData.length === 0) throw new Error("Supabase no devolvió la venta.");
 
-                cerrarModalEdicion();
-                await cargarDatosDesdeSupabase();
-                ocultarLoader();
-            } catch (err) {
-                ocultarLoader();
-                alert("Error al eliminar el modelo: " + err.message + "\nNota: Si tiene ventas asociadas en el historial, es posible que el sistema requiera mantener el registro o eliminar las ventas previas.");
-            }
-        }
-
-        async function venderTallaSupabase(indexProd, indexTalla) {
-            let prod = productos[indexProd];
-            let tallaObj = prod.tallas[indexTalla];
-
-            if(tallaObj.cantidad <= 0) return alert("No quedan unidades de esta talla.");
-
-            mostrarLoader("Procesando venta...");
-
-            try {
-                let { data: clientData, error: clientError } = await supabaseClient
-                    .from('clients')
-                    .select('id')
-                    .eq('name', 'Cliente General')
-                    .single();
-
-                let clientId;
-                if (!clientData) {
-                    const { data: newClient, error: newClientErr } = await supabaseClient
-                        .from('clients')
-                        .insert([{ name: 'Cliente General', phone: '0000000000' }])
-                        .select();
-                    if (newClientErr) throw newClientErr;
-                    clientId = newClient[0].id;
-                } else {
-                    clientId = clientData.id;
-                }
-
-                const { data: saleData, error: saleError } = await supabaseClient
-                    .from('sales')
-                    .insert([{ client_id: clientId, total_amount: tallaObj.precio }])
-                    .select();
-                if (saleError) throw saleError;
                 const saleId = saleData[0].id;
 
-                const { error: itemError } = await supabaseClient
-                    .from('sale_items')
-                    .insert([{
-                        sale_id: saleId,
-                        shoe_id: prod.id,
-                        size: tallaObj.talla,
-                        quantity: 1,
-                        unit_price: tallaObj.precio,
-                        unit_cost: tallaObj.costo
-                    }]);
-                if (itemError) throw itemError;
+                await supabaseClient.from('sale_items').insert([{
+                    sale_id: saleId, shoe_id: prod.id, size: tallaObj.talla,
+                    quantity: 1, unit_price: montoIngresado, unit_cost: tallaObj.costo
+                }]);
 
-                const nuevoStock = tallaObj.cantidad - 1;
-                const { error: updateError } = await supabaseClient
-                    .from('shoe_stock')
-                    .update({ quantity: nuevoStock })
-                    .eq('id', tallaObj.stock_id);
-                if (updateError) throw updateError;
-
+                await supabaseClient.from('shoe_stock').update({ quantity: tallaObj.cantidad - 1 }).eq('id', tallaObj.stock_id);
                 await cargarDatosDesdeSupabase();
                 ocultarLoader();
-
             } catch (err) {
                 ocultarLoader();
-                alert("Error al procesar la venta: " + err.message);
+                alert("Error al guardar:\n" + err.message);
             }
         }
 
         async function actualizarUIFinanzasSupabase() {
             try {
-                const { data: itemsData, error: itemsError } = await supabaseClient
-                    .from('sale_items')
-                    .select(`
-                        *,
-                        sales ( sale_date ),
-                        shoes ( description, photo_url )
-                    `);
-
-                if (itemsError) throw itemsError;
-
-                const hoyStr = new Date().toDateString();
-                let vendidoHoy = 0;
-                let gananciaHoy = 0;
-                let cantidadHoy = 0;
-                let detalleHoy = [];
-                let historialAgrupado = {};
-
-                itemsData.forEach(item => {
-                    if (!item.sales || !item.shoes) return;
-                    const fechaVenta = new Date(item.sales.sale_date);
-                    const fechaStr = fechaVenta.toLocaleDateString('es-ES');
-                    const esHoy = fechaVenta.toDateString() === hoyStr;
-
-                    const totalItem = item.unit_price * item.quantity;
-                    const gananciaItem = item.profit !== null && item.profit !== undefined ? Number(item.profit) : (item.unit_price - item.unit_cost) * item.quantity;
-
-                    if (esHoy) {
-                        vendidoHoy += totalItem;
-                        gananciaHoy += gananciaItem;
-                        cantidadHoy += item.quantity;
-                        detalleHoy.push({
-                            idProducto: item.shoe_id,
-                            nombre: item.shoes.description,
-                            foto: item.shoes.photo_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff',
-                            talla: item.size,
-                            cantidad: item.quantity,
-                            total: totalItem,
-                            ganancia: gananciaItem
-                        });
-                    }
-
-                    if (!historialAgrupado[fechaStr]) {
-                        historialAgrupado[fechaStr] = { fecha: fechaStr, ventas: 0, ganancias: 0, cantidad: 0, detalle: [] };
-                    }
-                    historialAgrupado[fechaStr].ventas += totalItem;
-                    historialAgrupado[fechaStr].ganancias += gananciaItem;
-                    historialAgrupado[fechaStr].cantidad += item.quantity;
-                    historialAgrupado[fechaStr].detalle.push({
-                        idProducto: item.shoe_id,
-                        nombre: item.shoes.description,
-                        foto: item.shoes.photo_url || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff',
-                        talla: item.size,
-                        cantidad: item.quantity,
-                        total: totalItem,
-                        ganancia: gananciaItem
-                    });
-                });
-
-                document.getElementById('total-vendido').innerText = `$${vendidoHoy.toFixed(2)}`;
-                document.getElementById('total-ganancia').innerText = `$${gananciaHoy.toFixed(2)}`;
-                document.getElementById('cantidad-vendida').innerText = cantidadHoy;
-                document.getElementById('lista-ventas-hoy').innerHTML = generarHTMLListaProductos(detalleHoy);
-
-                let arrayHistorial = Object.values(historialAgrupado);
-                const tbody = document.getElementById('tabla-historial-body');
-                tbody.innerHTML = '';
+                let itemsData = [];
                 
-                let historialReciente = [...arrayHistorial].slice(-5);
-                if(historialReciente.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #9CA3AF; padding: 20px;">No hay historial registrado.</td></tr>`;
+                if (navigator.onLine) {
+                    const { data, error } = await supabaseClient.from('sale_items').select(`
+                        *, sales ( sale_date, store, currency, original_amount ), shoes ( description, photo_url )
+                    `);
+                    if (!error && data) {
+                        itemsData = data;
+                        localStorage.setItem('finanzas_cache', JSON.stringify(itemsData)); 
+                    }
                 } else {
-                    window._historialGlobal = arrayHistorial;
-                    historialReciente.forEach((dia) => {
-                        tbody.innerHTML += `
-                            <tr>
-                                <td style="font-weight: 600;">${dia.fecha}</td>
-                                <td style="font-weight: 700;">$${dia.ventas.toFixed(2)}</td>
-                                <td style="text-align:right;">
-                                    <button class="btn-ver-detalle" onclick="abrirModalReporteSupabase('${dia.fecha}')">Ver</button>
-                                </td>
-                            </tr>`;
-                    });
+                    const cache = localStorage.getItem('finanzas_cache');
+                    if (cache) itemsData = JSON.parse(cache);
                 }
 
-                let etiquetas = arrayHistorial.map(d => d.fecha);
-                let datosVentas = arrayHistorial.map(d => d.ventas);
-                let datosGanancias = arrayHistorial.map(d => d.ganancias);
-                dibujarGrafica(etiquetas, datosVentas, datosGanancias);
+                const hoyStr = new Date().toDateString();
+                dataTiendasGlobal = {
+                    'Tienda 1': { bob: 0, ars: 0, costoTotal: 0, pares: 0 },
+                    'Tienda 2': { bob: 0, ars: 0, costoTotal: 0, pares: 0 }
+                };
 
-            } catch (err) {
-                console.error("Error al actualizar finanzas:", err.message);
+                let listaVentasT1 = '';
+                let listaVentasT2 = '';
+
+                // DIBUJAR VENTAS ONLINE / CACHÉ NORMALES
+                itemsData.forEach(item => {
+                    if (!item.sales) return;
+                    const fecha = new Date(item.sales.sale_date);
+                    
+                    let tienda = item.sales.store || 'Tienda 1';
+                    let moneda = item.sales.currency || 'BOB';
+                    let montoManejado = parseFloat(item.unit_price); 
+                    let costoItem = item.unit_cost * item.quantity;
+
+                    if (fecha.toDateString() === hoyStr) {
+                        if(!dataTiendasGlobal[tienda]) dataTiendasGlobal[tienda] = { bob: 0, ars: 0, costoTotal: 0, pares: 0 };
+                        
+                        dataTiendasGlobal[tienda].pares += item.quantity;
+                        dataTiendasGlobal[tienda].costoTotal += costoItem;
+                        if (moneda === 'ARS') dataTiendasGlobal[tienda].ars += montoManejado;
+                        else dataTiendasGlobal[tienda].bob += montoManejado;
+
+                        let nombreReal = item.shoes ? item.shoes.description.replace('[ARCHIVADO] ', '') : 'Zapato';
+                        let fotoReal = item.shoes ? item.shoes.photo_url : '';
+                        
+                        let itemHTML = `
+                            <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:16px; padding:14px; margin-bottom:12px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                                <div style="display:flex; gap:12px; align-items:flex-start;">
+                                    <img src="${fotoReal}" style="width:50px; height:50px; border-radius:12px; object-fit:cover; border:1px solid #E2E8F0; flex-shrink: 0;">
+                                    <div style="flex:1; min-width:0;">
+                                        <div style="font-size:15px; font-weight:800; color:#0F172A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${nombreReal}</div>
+                                        <div style="font-size:12px; color:#64748B; font-weight:600; margin-top:2px;">Talla: ${item.size} &bull; Sucursal: ${tienda}</div>
+                                        <div style="font-size:15px; font-weight:800; color:#2563EB; margin-top:6px;">${moneda === 'ARS' ? '$' : 'Bs.'} ${montoManejado.toFixed(2)}</div>
+                                    </div>
+                                </div>
+                                <div style="display:flex; justify-content:flex-end; margin-top:10px; border-top:1px solid #F1F5F9; pt:10px;">
+                                    <button class="btn-revertir" onclick="revertirVentaSupabase('${item.id}', '${item.sale_id}', '${item.shoe_id}', ${item.size})">Revertir</button>
+                                </div>
+                            </div>
+                        `;
+
+                        if (tienda === 'Tienda 1') listaVentasT1 += itemHTML;
+                        else if (tienda === 'Tienda 2') listaVentasT2 += itemHTML;
+                    }
+                });
+
+                // DIBUJAR VENTAS OFFLINE CON DISEÑO ESTRUCTURADO Y BOTÓN ABAJO
+                ventasOffline.forEach(v => {
+                    const fecha = new Date(v.fecha);
+                    if (fecha.toDateString() === hoyStr) {
+                        let tienda = v.tienda;
+                        let moneda = v.moneda;
+                        let montoManejado = parseFloat(v.monto);
+                        let costoItem = v.costo;
+
+                        if(!dataTiendasGlobal[tienda]) dataTiendasGlobal[tienda] = { bob: 0, ars: 0, costoTotal: 0, pares: 0 };
+                        
+                        dataTiendasGlobal[tienda].pares += 1; 
+                        dataTiendasGlobal[tienda].costoTotal += costoItem;
+                        if (moneda === 'ARS') dataTiendasGlobal[tienda].ars += montoManejado;
+                        else dataTiendasGlobal[tienda].bob += montoManejado;
+
+                        let itemHTML = `
+                            <div style="background:#FFFBEB; border:1px solid #FDE68A; border-radius:16px; padding:14px; margin-bottom:12px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+                                <div style="display:flex; gap:12px; align-items:flex-start;">
+                                    <img src="${v.foto}" style="width:50px; height:50px; border-radius:12px; object-fit:cover; border:1px solid #FCD34D; flex-shrink: 0;">
+                                    <div style="flex:1; min-width:0;">
+                                        <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
+                                            <div style="font-size:15px; font-weight:800; color:#92400E; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${v.nombre}</div>
+                                            <span style="background:#F59E0B; color:white; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:800; text-transform:uppercase; flex-shrink:0;">Local</span>
+                                        </div>
+                                        <div style="font-size:12px; color:#B45309; font-weight:600; margin-top:2px;">Talla: ${v.talla} &bull; Sucursal: ${tienda}</div>
+                                        <div style="font-size:15px; font-weight:800; color:#D97706; margin-top:6px;">${moneda === 'ARS' ? '$' : 'Bs.'} ${montoManejado.toFixed(2)}</div>
+                                    </div>
+                                </div>
+                                <div style="display:flex; justify-content:flex-end; margin-top:10px; border-top:1px solid #FEF3C7; padding-top:10px;">
+                                    <button class="btn-revertir" style="background:#FEF3C7; color:#D97706; border-color:#FCD34D;" onclick="revertirVentaOffline('${v.id}')">Revertir</button>
+                                </div>
+                            </div>
+                        `;
+
+                        if (tienda === 'Tienda 1') listaVentasT1 += itemHTML;
+                        else if (tienda === 'Tienda 2') listaVentasT2 += itemHTML;
+                    }
+                });
+
+                document.getElementById('pares-t1').innerText = `${dataTiendasGlobal['Tienda 1'].pares} pares`;
+                document.getElementById('bob-t1').innerText = `Bs. ${dataTiendasGlobal['Tienda 1'].bob.toFixed(2)}`;
+                document.getElementById('ars-t1').innerText = `$ ${dataTiendasGlobal['Tienda 1'].ars.toFixed(2)}`;
+                document.getElementById('res-t1').style.display = 'none';
+
+                document.getElementById('pares-t2').innerText = `${dataTiendasGlobal['Tienda 2'].pares} pares`;
+                document.getElementById('bob-t2').innerText = `Bs. ${dataTiendasGlobal['Tienda 2'].bob.toFixed(2)}`;
+                document.getElementById('ars-t2').innerText = `$ ${dataTiendasGlobal['Tienda 2'].ars.toFixed(2)}`;
+                document.getElementById('res-t2').style.display = 'none';
+
+                document.getElementById('lista-ventas-t1').innerHTML = listaVentasT1 || '<p style="text-align:center; color:#94A3B8; font-size:13px; margin-top:10px;">No hay ventas registradas hoy.</p>';
+                document.getElementById('lista-ventas-t2').innerHTML = listaVentasT2 || '<p style="text-align:center; color:#94A3B8; font-size:13px; margin-top:10px;">No hay ventas registradas hoy.</p>';
+                
+                actualizarVisibilidadHistorial();
+            } catch (err) { console.error("Error Finanzas:", err); }
+        }
+
+        function ejecutarCierreTienda(numTienda) {
+            let nombreTienda = 'Tienda ' + numTienda;
+            let datos = dataTiendasGlobal[nombreTienda];
+            
+            if (tasaARS_BOB === null) {
+                return alert("¡Debes configurar la Tasa de Cambio (ARS-BOB) primero! Haz clic en el ícono superior.");
+            }
+            
+            let conversionARS = datos.ars * tasaARS_BOB;
+            let totalBrutoBOB = datos.bob + conversionARS;
+            let gananciaNeta = totalBrutoBOB - datos.costoTotal;
+
+            document.getElementById(`conv-ars-t${numTienda}`).innerText = `+ Bs. ${conversionARS.toFixed(2)}`;
+            document.getElementById(`costo-t${numTienda}`).innerText = `- Bs. ${datos.costoTotal.toFixed(2)}`;
+            document.getElementById(`total-cierre-t${numTienda}`).innerText = `Bs. ${totalBrutoBOB.toFixed(2)}`;
+            document.getElementById(`ganancia-t${numTienda}`).innerText = `+ Bs. ${gananciaNeta.toFixed(2)}`;
+            document.getElementById(`res-t${numTienda}`).style.display = 'block';
+        }
+
+        async function revertirVentaSupabase(saleItemId, saleId, shoeId, size) {
+            if (!navigator.onLine) return alert("Debes tener internet para revertir una venta ya subida al servidor.");
+            if (!confirm("¿Revertir esta venta?")) return;
+            mostrarLoader("Revirtiendo...");
+            try {
+                const { data: stockData } = await supabaseClient.from('shoe_stock').select('id, quantity').eq('shoe_id', shoeId).eq('size', size).single();
+                await supabaseClient.from('sale_items').delete().eq('id', saleItemId);
+                if (stockData) await supabaseClient.from('shoe_stock').update({ quantity: stockData.quantity + 1 }).eq('id', stockData.id);
+                const { data: otherItems } = await supabaseClient.from('sale_items').select('id').eq('sale_id', saleId);
+                if (!otherItems || otherItems.length === 0) await supabaseClient.from('sales').delete().eq('id', saleId);
+                await cargarDatosDesdeSupabase();
+                ocultarLoader();
+            } catch (e) { ocultarLoader(); alert("Error al revertir: " + e.message); }
+        }
+
+        function revertirVentaOffline(idLocal) {
+            if (!confirm("¿Revertir esta venta local?")) return;
+            
+            let vIndex = ventasOffline.findIndex(v => v.id === idLocal);
+            if(vIndex > -1) {
+                let v = ventasOffline[vIndex];
+                
+                let prod = productos.find(p => p.id === v.zapato_id);
+                if(prod) {
+                    let t = prod.tallas.find(t => t.talla === v.talla);
+                    if(t) t.cantidad += 1;
+                }
+                localStorage.setItem('inventario_cache', JSON.stringify(productos));
+                renderizarInventario();
+                
+                ventasOffline.splice(vIndex, 1);
+                localStorage.setItem('ventas_offline', JSON.stringify(ventasOffline));
+                
+                actualizarUIFinanzasSupabase();
+                actualizarEstadoConexion();
             }
         }
 
-        function generarHTMLListaProductos(lista) {
-            if (!lista || lista.length === 0) return `<p style="text-align:center; color:#9CA3AF; font-size:13px; padding:15px;">No hay ventas registradas.</p>`;
-            return lista.map(v => `
-                <div class="item-venta">
-                    <img src="${v.foto}" alt="${v.nombre}">
-                    <div class="item-venta-info">
-                        <div class="item-venta-nombre">${v.nombre}</div>
-                        <div class="item-venta-meta">Talla ${v.talla} • Vendidos: <strong>${v.cantidad}</strong></div>
-                    </div>
-                    <div class="item-venta-finanzas">
-                        <div class="item-venta-total">$${v.total.toFixed(2)}</div>
-                        <div class="item-venta-ganancia">+$${v.ganancia.toFixed(2)}</div>
-                    </div>
-                </div>
-            `).join('');
-        }
+        document.getElementById('form-producto').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!navigator.onLine) {
+                return alert("Debes tener conexión a Internet para crear un producto nuevo con foto.");
+            }
 
-        function abrirModalReporteSupabase(fechaStr) {
-            let dia = window._historialGlobal.find(d => d.fecha === fechaStr);
-            if (!dia) return;
-            document.getElementById('modal-reporte-fecha').innerText = dia.fecha;
-            document.getElementById('modal-reporte-vendido').innerText = `$${dia.ventas.toFixed(2)}`;
-            document.getElementById('modal-reporte-ganancia').innerText = `$${dia.ganancias.toFixed(2)}`;
-            document.getElementById('modal-reporte-lista').innerHTML = generarHTMLListaProductos(dia.detalle);
-            document.getElementById('modal-reporte-dia').style.display = 'flex';
-        }
+            if(tallasConfiguradas.length === 0) return alert("Configura al menos una talla.");
+            if(!archivoFotoSeleccionado) return alert("Selecciona una foto.");
 
-        function cerrarModalReporte() { document.getElementById('modal-reporte-dia').style.display = 'none'; }
+            const nombre = document.getElementById('nombre-zapato').value;
+            const file = archivoFotoSeleccionado;
+            const costoBase = tallasConfiguradas[0].costo;
+            const precioBase = tallasConfiguradas[0].precio;
 
-        function dibujarGrafica(etiquetas, ventas, ganancias) {
-            const ctx = document.getElementById('graficaHistorial').getContext('2d');
-            if (chartInstancia) chartInstancia.destroy();
-            chartInstancia = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: etiquetas,
-                    datasets: [
-                        { label: 'Vendido ($)', data: ventas, backgroundColor: '#111827', borderRadius: 6, barPercentage: 0.6, categoryPercentage: 0.7 },
-                        { label: 'Ganancia ($)', data: ganancias, backgroundColor: '#059669', borderRadius: 6, barPercentage: 0.6, categoryPercentage: 0.7 }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { position: 'top', align: 'end', labels: { font: { family: '-apple-system, sans-serif', size: 11, weight: '600' }, color: '#111827', usePointStyle: true, pointStyle: 'circle', padding: 12 } },
-                        tooltip: { backgroundColor: '#111827', padding: 10, cornerRadius: 8, titleFont: { size: 12, weight: '700' }, bodyFont: { size: 12 } }
-                    },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { font: { family: '-apple-system, sans-serif', size: 11 }, color: '#6B7280' } },
-                        y: { grid: { color: '#F3F4F6', drawBorder: false }, ticks: { font: { family: '-apple-system, sans-serif', size: 11 }, color: '#9CA3AF', callback: function(value) { return '$' + value; } } }
-                    }
+            try {
+                mostrarLoader("Subiendo producto...");
+                const blob = await comprimirImagen(file, 800, 800, 0.8);
+                const fileName = `zapato_${Date.now()}.jpg`;
+                const { error: uploadError } = await supabaseClient.storage.from('shoe_images').upload(fileName, blob);
+                if (uploadError) throw uploadError;
+                const fotoUrl = supabaseClient.storage.from('shoe_images').getPublicUrl(fileName).data.publicUrl;
+                
+                const { data: shoeData } = await supabaseClient.from('shoes').insert([{ description: nombre, cost: costoBase, selling_price: precioBase, photo_url: fotoUrl }]).select();
+                const records = tallasConfiguradas.map(t => ({ shoe_id: shoeData[0].id, size: t.talla, quantity: t.cantidad }));
+                await supabaseClient.from('shoe_stock').insert(records);
+
+                document.getElementById('form-producto').reset(); 
+                archivoFotoSeleccionado = null; 
+                document.getElementById('preview-foto-container').style.display = 'none'; 
+                tallasConfiguradas = []; 
+                document.getElementById('texto-tallas-seleccionadas').innerText = "Ninguna talla configurada.";
+                
+                for(let i = 35; i <= 45; i++) {
+                    document.getElementById(`cant-${i}`).value = "0";
+                    document.getElementById(`costo-${i}`).value = "0";
+                    document.getElementById(`precio-${i}`).value = "0";
                 }
-            });
+
+                await cargarDatosDesdeSupabase(); 
+                ocultarLoader(); 
+                cambiarPantalla('inventario');
+            } catch (err) { 
+                ocultarLoader(); 
+                alert("Error: " + err.message); 
+            }
+        });
+
+        function abrirModalEdicion(indexProd) {
+            productoEnEdicionIndex = indexProd; let prod = productos[indexProd];
+            document.getElementById('edit-nombre-zapato').value = prod.nombre.replace('[ARCHIVADO] ', '');
+            const cont = document.getElementById('contenedor-editar-tallas'); cont.innerHTML = '';
+            for (let i = 35; i <= 45; i++) {
+                let t = prod.tallas.find(x => x.talla === i); let stock = t ? t.cantidad : 0, costo = t ? t.costo : prod.costo_base, precio = t ? t.precio : prod.precio_base; let sId = t ? t.stock_id : '';
+                cont.innerHTML += `<div style="background:#F8FAFC; padding:12px; margin-bottom:10px; border-radius:12px;"><label>Talla ${i}</label><input type="hidden" id="e-sid-${i}" value="${sId}"><div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;"><div><span style="font-size:11px;">Stock</span><input type="number" id="e-cant-${i}" value="${stock}"></div><div><span style="font-size:11px;">Costo</span><input type="number" id="e-costo-${i}" value="${costo}" step="0.01"></div><div><span style="font-size:11px;">Precio</span><input type="number" id="e-precio-${i}" value="${precio}" step="0.01"></div></div></div>`;
+            }
+            document.getElementById('modal-editar-producto').style.display = 'flex';
         }
+
+        async function guardarCambiosProducto() {
+            if (!navigator.onLine) return alert("Debes tener conexión a Internet para editar el stock.");
+            if (productoEnEdicionIndex === null) return; let prod = productos[productoEnEdicionIndex]; mostrarLoader("Actualizando...");
+            try {
+                await supabaseClient.from('shoes').update({ description: document.getElementById('edit-nombre-zapato').value }).eq('id', prod.id);
+                for (let i = 35; i <= 45; i++) {
+                    let sid = document.getElementById(`e-sid-${i}`).value, cant = parseInt(document.getElementById(`e-cant-${i}`).value) || 0;
+                    let costo = parseFloat(document.getElementById(`e-costo-${i}`).value) || prod.costo_base, precio = parseFloat(document.getElementById(`e-precio-${i}`).value) || prod.precio_base;
+                    if (sid) { await supabaseClient.from('shoe_stock').update({ quantity: cant }).eq('id', sid); await supabaseClient.from('shoes').update({ cost: costo, selling_price: precio }).eq('id', prod.id); } 
+                    else if (cant > 0) { await supabaseClient.from('shoe_stock').insert([{ shoe_id: prod.id, size: i, quantity: cant }]); await supabaseClient.from('shoes').update({ cost: costo, selling_price: precio }).eq('id', prod.id); }
+                }
+                cerrarModalEdicion(); await cargarDatosDesdeSupabase(); ocultarLoader();
+            } catch(e) { ocultarLoader(); alert("Error: " + e.message); }
+        }
+
+        async function eliminarModeloZapato() {
+            if (!navigator.onLine) return alert("Debes tener conexión a Internet para eliminar un producto.");
+            let prod = productos[productoEnEdicionIndex]; if (!confirm(`¿Eliminar "${prod.nombre}"?`)) return; mostrarLoader("Verificando...");
+            try {
+                const { data: v } = await supabaseClient.from('sale_items').select('id').eq('shoe_id', prod.id);
+                if (v && v.length > 0) { alert("Se archivará para no dañar reportes."); await supabaseClient.from('shoes').update({ description: '[ARCHIVADO] ' + prod.nombre }).eq('id', prod.id); await supabaseClient.from('shoe_stock').update({ quantity: 0 }).eq('shoe_id', prod.id); } 
+                else { await supabaseClient.from('shoe_stock').delete().eq('shoe_id', prod.id); await supabaseClient.from('shoes').delete().eq('id', prod.id); }
+                cerrarModalEdicion(); await cargarDatosDesdeSupabase(); ocultarLoader();
+            } catch (e) { ocultarLoader(); alert("Error: " + e.message); }
+        }
+
+        let archivoFotoSeleccionado = null;
+        function seleccionarFotoUI(input) { if (input.files && input.files[0]) { archivoFotoSeleccionado = input.files[0]; const reader = new FileReader(); reader.onload = e => { document.getElementById('preview-foto').src = e.target.result; document.getElementById('preview-foto-container').style.display = 'block'; }; reader.readAsDataURL(input.files[0]); } }
+        function comprimirImagen(file, maxW, maxH, q) { return new Promise((res, rej) => { const r = new FileReader(); r.readAsDataURL(file); r.onload = e => { const img = new Image(); img.src = e.target.result; img.onload = () => { let w = img.width, h = img.height; if (w > maxW) { h = Math.round((h * maxW)/w); w = maxW; } if (h > maxH) { w = Math.round((w * maxH)/h); h = maxH; } const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h); canvas.toBlob(blob => res(blob), 'image/jpeg', q); }; img.onerror = err => rej(err); }; }); }
+        function exportarInventarioExcel() { let csv = "data:text/csv;charset=utf-8,\uFEFFProducto,Talla,Stock,Costo,Precio\r\n"; productos.forEach(p => { if (p.nombre.startsWith('[ARCHIVADO]')) return; p.tallas.forEach(t => { if (t.cantidad > 0) csv += `"${p.nombre}",${t.talla},${t.cantidad},${t.costo},${t.precio}\r\n`; }); }); let link = document.createElement("a"); link.setAttribute("href", encodeURI(csv)); link.setAttribute("download", `Inventario_${new Date().toLocaleDateString('es-ES')}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); }
+        function cambiarPantalla(pantalla) { document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa')); document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('activa')); document.getElementById('pantalla-' + pantalla).classList.add('activa'); document.getElementById('nav-' + pantalla).classList.add('activa'); if(pantalla === 'ganancias') actualizarUIFinanzasSupabase(); }
+        function toggleSearch() { let e = document.getElementById('search-bar-container'); e.style.display = e.style.display === 'block' ? 'none' : 'block'; }
+        function filtrarInventario(q) { renderizarInventario(productos.filter(p => p.nombre.toLowerCase().includes(q.toLowerCase()))); }
+        function abrirModalTallas() { document.getElementById('modal-tallas').style.display = 'flex'; }
+        function cerrarModalTallas(guardar) { if(guardar) { tallasConfiguradas = []; for(let i=35; i<=45; i++) { let cant = parseInt(document.getElementById(`cant-${i}`).value)||0; if(cant>0) tallasConfiguradas.push({ talla:i, cantidad:cant, costo:parseFloat(document.getElementById(`costo-${i}`).value)||0, precio:parseFloat(document.getElementById(`precio-${i}`).value)||0 }); } let t = document.getElementById('texto-tallas-seleccionadas'); t.innerText = tallasConfiguradas.length > 0 ? "Configuradas: " + tallasConfiguradas.map(x=>x.talla).join(', ') : "Ninguna talla configurada."; } document.getElementById('modal-tallas').style.display = 'none'; }
+        function cerrarModalSeleccionarTalla() { document.getElementById('modal-seleccionar-talla').style.display = 'none'; }
+        function cerrarModalVenta() { document.getElementById('modal-confirmar-venta').style.display = 'none'; }
+        function cerrarModalEdicion() { document.getElementById('modal-editar-producto').style.display = 'none'; }
+        function mostrarLoader(t) { document.getElementById('loader-text').innerText = t; document.getElementById('loader-overlay').style.display = 'flex'; }
+        function ocultarLoader() { document.getElementById('loader-overlay').style.display = 'none'; }
     </script>
 </body>
 </html>
-
