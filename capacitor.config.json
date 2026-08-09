@@ -1,6 +1,6 @@
 {
-  "appId": "com.ferrowill.app",
-  "appName": "FerroWill",
+  "appId": "com.Zapatod.app",
+  "appName": "InventarioZ",
   "webDir": "www",
   "bundledWebRuntime": false
 }
