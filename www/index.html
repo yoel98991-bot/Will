@@ -365,7 +365,7 @@
                 <svg viewBox="0 0 24 24" width="30" height="30" stroke="#1D4ED8" stroke-width="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
             </div>
             <h2 style="font-size:22px; font-weight:800; color:#0F172A; margin-top:0; margin-bottom:8px;">Vincular Dispositivo</h2>
-            <p style="color:#64748B; font-size:14px; margin-bottom:20px;">Ingresa el PIN de Tienda (1111 / 2222) o Clave Admin.</p>
+            <p style="color:#64748B; font-size:14px; margin-bottom:20px;">Ingresa el PIN de acceso.</p>
             <input type="password" id="input-codigo-tienda" placeholder="PIN..." style="text-align:center; letter-spacing:4px; font-size:20px; font-weight:800; margin-bottom:20px;">
             <button class="btn" style="background:#2563EB;" onclick="verificarCodigoTienda()">Verificar y Entrar</button>
         </div>
@@ -710,94 +710,88 @@
         window.addEventListener('offline', actualizarEstadoConexion);
 
         async function sincronizarVentasOffline() {
-    if (ventasOffline.length === 0 || !navigator.onLine) return;
-    mostrarLoader("Sincronizando ventas locales...");
-    if (!clienteGeneralId) await verificarClienteGeneral();
+            if (ventasOffline.length === 0 || !navigator.onLine) return;
+            mostrarLoader("Sincronizando ventas locales...");
+            if (!clienteGeneralId) await verificarClienteGeneral();
 
-    let ventasExitosas = []; // guardaremos las que se suban bien
+            let ventasExitosas = [];
 
-    try {
-        for (let v of ventasOffline) {
             try {
-                // 1. Insertar la venta principal
-                const { data: saleData, error: saleError } = await supabaseClient
-                    .from('sales')
-                    .insert([{ 
-                        client_id: clienteGeneralId,
-                        store: v.tienda,
-                        currency: v.moneda,
-                        original_amount: v.monto,
-                        total_amount: v.monto 
-                    }])
-                    .select();
+                for (let v of ventasOffline) {
+                    try {
+                        const { data: saleData, error: saleError } = await supabaseClient
+                            .from('sales')
+                            .insert([{ 
+                                client_id: clienteGeneralId,
+                                store: v.tienda,
+                                currency: v.moneda,
+                                original_amount: v.monto,
+                                total_amount: v.monto 
+                            }])
+                            .select();
 
-                if (saleError || !saleData || saleData.length === 0) {
-                    console.warn("No se pudo insertar 'sales' para venta local:", v.id, saleError);
-                    continue; // esta venta se reintentará luego
+                        if (saleError || !saleData || saleData.length === 0) {
+                            console.warn("No se pudo insertar 'sales' para venta local:", v.id, saleError);
+                            continue;
+                        }
+
+                        const saleId = saleData[0].id;
+
+                        const { error: itemError } = await supabaseClient
+                            .from('sale_items')
+                            .insert([{
+                                sale_id: saleId,
+                                shoe_id: v.zapato_id,
+                                size: v.talla,
+                                quantity: 1,
+                                unit_price: v.monto,
+                                unit_cost: v.costo
+                            }]);
+
+                        if (itemError) {
+                            console.warn("Error en sale_items, se cancela esta venta:", itemError);
+                            await supabaseClient.from('sales').delete().eq('id', saleId);
+                            continue;
+                        }
+
+                        const { data: stockData } = await supabaseClient
+                            .from('shoe_stock')
+                            .select('quantity')
+                            .eq('id', v.stock_id)
+                            .single();
+
+                        if (stockData) {
+                            await supabaseClient
+                                .from('shoe_stock')
+                                .update({ quantity: stockData.quantity - 1 })
+                                .eq('id', v.stock_id);
+                        }
+
+                        ventasExitosas.push(v.id);
+                    } catch (innerError) {
+                        console.error("Error procesando venta offline:", v.id, innerError);
+                    }
                 }
 
-                const saleId = saleData[0].id;
+                ventasOffline = ventasOffline.filter(v => !ventasExitosas.includes(v.id));
+                localStorage.setItem('ventas_offline', JSON.stringify(ventasOffline));
 
-                // 2. Insertar el detalle de la venta
-                const { error: itemError } = await supabaseClient
-                    .from('sale_items')
-                    .insert([{
-                        sale_id: saleId,
-                        shoe_id: v.zapato_id,
-                        size: v.talla,
-                        quantity: 1,
-                        unit_price: v.monto,
-                        unit_cost: v.costo
-                    }]);
-
-                if (itemError) {
-                    console.warn("Error en sale_items, se cancela esta venta:", itemError);
-                    // Eliminar la venta principal que ya se creó (rollback)
-                    await supabaseClient.from('sales').delete().eq('id', saleId);
-                    continue; // se reintentará luego
+                if (ventasExitosas.length > 0) {
+                    const badge = document.getElementById('badge-conexion');
+                    badge.innerText = `¡${ventasExitosas.length} subidas!`;
+                    badge.style.background = "#3B82F6";
+                    setTimeout(() => actualizarEstadoConexion(), 4000);
+                    await cargarDatosDesdeSupabase();
                 }
 
-                // 3. Actualizar stock
-                const { data: stockData } = await supabaseClient
-                    .from('shoe_stock')
-                    .select('quantity')
-                    .eq('id', v.stock_id)
-                    .single();
-
-                if (stockData) {
-                    await supabaseClient
-                        .from('shoe_stock')
-                        .update({ quantity: stockData.quantity - 1 })
-                        .eq('id', v.stock_id);
-                }
-
-                // Si llegamos aquí, la venta se subió completamente
-                ventasExitosas.push(v.id);
-            } catch (innerError) {
-                console.error("Error procesando venta offline:", v.id, innerError);
-                // Se continuará con la siguiente, y esta quedará para reintentar
+                ocultarLoader();
+            } catch (err) {
+                ocultarLoader();
+                console.error("Error general en sincronización:", err);
+                alert("Hubo un problema al sincronizar. Se intentará más tarde.");
             }
         }
 
-        // Eliminar solo las ventas que se sincronizaron correctamente
-        ventasOffline = ventasOffline.filter(v => !ventasExitosas.includes(v.id));
-        localStorage.setItem('ventas_offline', JSON.stringify(ventasOffline));
-
-        if (ventasExitosas.length > 0) {
-            const badge = document.getElementById('badge-conexion');
-            badge.innerText = `¡${ventasExitosas.length} subidas!`;
-            badge.style.background = "#3B82F6";
-            setTimeout(() => actualizarEstadoConexion(), 4000);
-            await cargarDatosDesdeSupabase(); // refrescar inventario e historial
-        }
-
-        ocultarLoader();
-    } catch (err) {
-        ocultarLoader();
-        console.error("Error general en sincronización:", err);
-        alert("Hubo un problema al sincronizar. Se intentará más tarde.");
-    }
-}
         async function verificarClienteGeneral() {
             try {
                 if(!navigator.onLine) return; 
@@ -829,15 +823,15 @@
 
         function verificarCodigoTienda() {
             let codigo = document.getElementById('input-codigo-tienda').value.trim();
-            if (codigo === '1111') {
+            if (codigo === '7520') {
                 localStorage.setItem('tienda_activa', 'Tienda 1');
                 tiendaActiva = 'Tienda 1';
                 cerrarModalBloqueo();
-            } else if (codigo === '2222') {
+            } else if (codigo === '8520') {
                 localStorage.setItem('tienda_activa', 'Tienda 2');
                 tiendaActiva = 'Tienda 2';
                 cerrarModalBloqueo();
-            } else if (codigo === '123456789') {
+            } else if (codigo === '191936') {
                 currentRole = 'admin';
                 document.body.classList.remove('role-vendedor');
                 document.getElementById('btn-admin-toggle').innerText = 'Salir Admin';
@@ -866,7 +860,7 @@
         function toggleAdmin() {
             if (currentRole === 'vendedor') {
                 const pass = prompt("Contraseña de Admin:");
-                if (pass === "123456789") {
+                if (pass === "191936") {
                     currentRole = 'admin';
                     document.body.classList.remove('role-vendedor');
                     document.getElementById('btn-admin-toggle').innerText = 'Salir Admin';
